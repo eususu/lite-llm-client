@@ -1,6 +1,7 @@
+from typing import List
 from llm_client.anthropic_client import AnthropicClient, AnthropicConfig
 from llm_client.config import LLMConfig, OpenAIConfig
-from llm_client.interfaces import LLMClient
+from llm_client.interfaces import LLMClient, LLMMessage
 from llm_client.openai_client import OpenAIClient
 
 
@@ -17,5 +18,5 @@ class LiteLLMClient():
       self.client = AnthropicClient(config)
     
 
-  def chat_completions(self, messages):
+  def chat_completions(self, messages:List[LLMMessage]):
     return self.client.chat_completions(messages=messages)

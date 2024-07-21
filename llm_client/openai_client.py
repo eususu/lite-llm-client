@@ -1,7 +1,10 @@
 import os
 import logging
+from typing import List
 from llm_client.config import OpenAIConfig
 import requests
+
+from llm_client.interfaces import LLMMessage, LLMMessageRole
 
 class OpenAIClient():
   config:OpenAIConfig
@@ -9,10 +12,24 @@ class OpenAIClient():
   def __init__(self, config:OpenAIConfig):
     self.config = config
 
-  def chat_completions(self, messages):
+  def chat_completions(self, messages:List[LLMMessage]):
+    msgs = []
+    for msg in messages:
+      role = None
+      if msg.role == LLMMessageRole.USER:
+        role = "user"
+      elif msg.role == LLMMessageRole.SYSTEM:
+        role = "system"
+      elif msg.role == LLMMessageRole.ASSISTANT:
+        role = "assistant"
+      else:
+        logging.fatal("unknown role")
+
+      msgs.append({"role": role, "content": msg.content})
+
     request = {
       "model": self.config.model.value,
-      "messages": messages,
+      "messages": msgs,
       "temperature": 0.0
     }
 
