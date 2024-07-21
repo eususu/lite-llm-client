@@ -4,9 +4,15 @@ from llm_client.lite_llm_client import LiteLLMClient
 
 logging.basicConfig(level='debug')
 
-client = LiteLLMClient(OpenAIConfig(model=SupportedModel.GPT_4_O))
+client = LiteLLMClient(OpenAIConfig(
+  model=SupportedModel.GPT_4_O
+  ))
 
-answer = client.chat_completions(messages="hello")
+messages = [
+  {"role": "user", "content":"hello"}
+]
+
+answer = client.chat_completions(messages=messages)
 
 logging.info("asdf {}".format(answer))
 
