@@ -37,13 +37,11 @@ class AnthropicClient():
 
     logging.info(f'request={request}')
 
-    api_key = self.config.api_key if self.config.api_key else os.environ["ANTHROPIC_API_KEY"]
-
     http_response = requests.api.post(
       self.config.get_chat_completion_url(),
       headers={
         'Content-Type': 'application/json',
-        'x-api-key': f'{api_key}',
+        'x-api-key': f'{self.config.api_key}',
         'anthropic-version': '2023-06-01',
         },
       json=request

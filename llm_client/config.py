@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+import os
 from dotenv import load_dotenv
 from enum import Enum
 from typing import Optional
@@ -20,7 +21,7 @@ class LLMConfig(ABC):
 ###################################################
 class OpenAIConfig(LLMConfig):
   base_url: str
-  api_key: Optional[str]=None,
+  api_key: str
   chat_completion_path: Optional[str] ="/v1/chat/completions"
   model:OpenAIModel|str
 
@@ -28,8 +29,15 @@ class OpenAIConfig(LLMConfig):
                base_url:str="https://api.openai.com",
                api_key:str=None,
                model:OpenAIModel|str=OpenAIModel.GPT_4_O):
+    """
+    parameters
+    - api_key: if None, use environment variable "OPENAI_API_KEY"
+    """
+
     self.base_url = base_url
     self.api_key = api_key
+    if not self.api_key and "OPENAI_API_KEY" in os.environ:
+      self.api_key = os.environ["OPENAI_API_KEY"]
     self.model = model
   
   def get_chat_completion_url(self)->str:
@@ -41,7 +49,7 @@ class AnthropicModel(Enum):
 
 class AnthropicConfig(LLMConfig):
   base_url: str
-  api_key: Optional[str]=None,
+  api_key: str
   chat_completion_path: Optional[str] ="/v1/messages"
   model:AnthropicModel|str
 
@@ -55,8 +63,11 @@ class AnthropicConfig(LLMConfig):
     parameters
     - api_key: if None, use environment variable "ANTHROPIC_API_KEY"
     """
+
     self.base_url = base_url
     self.api_key = api_key
+    if not self.api_key and "ANTHROPIC_API_KEY" in os.environ:
+      self.api_key = os.environ["ANTHROPIC_API_KEY"]
     self.model = model
 
   def get_chat_completion_url(self)->str:
