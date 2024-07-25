@@ -3,8 +3,8 @@ import os
 from typing import List
 
 import requests
-from llm_client._config import AnthropicConfig
-from llm_client._interfaces import LLMMessage, LLMMessageRole
+from lite_llm_client._config import AnthropicConfig
+from lite_llm_client._interfaces import LLMMessage, LLMMessageRole
 
 
 class _AnthropicClient():

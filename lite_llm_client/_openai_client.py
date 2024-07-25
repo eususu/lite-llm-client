@@ -1,10 +1,10 @@
 import os
 import logging
 from typing import List
-from llm_client._config import OpenAIConfig
+from lite_llm_client._config import OpenAIConfig
 import requests
 
-from llm_client._interfaces import LLMMessage, LLMMessageRole
+from lite_llm_client._interfaces import LLMMessage, LLMMessageRole
 
 class _OpenAIClient():
   config:OpenAIConfig
