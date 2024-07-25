@@ -7,7 +7,7 @@ from llm_client.config import AnthropicConfig
 from llm_client.interfaces import LLMMessage, LLMMessageRole
 
 
-class AnthropicClient():
+class _AnthropicClient():
   config: AnthropicConfig
   
   def __init__(self, config:AnthropicConfig):

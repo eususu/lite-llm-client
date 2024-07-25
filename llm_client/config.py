@@ -13,13 +13,13 @@ class OpenAIModel(Enum):
   GPT_4_O = "gpt-4o"
 
 @dataclass
-class LLMConfig(ABC):
+class _LLMConfig(ABC):
   @abstractmethod
   def get_chat_completion_url(self)->str:
     raise NotImplementedError
 
 ###################################################
-class OpenAIConfig(LLMConfig):
+class OpenAIConfig(_LLMConfig):
   base_url: str
   api_key: str
   chat_completion_path: Optional[str] ="/v1/chat/completions"
@@ -47,7 +47,7 @@ class OpenAIConfig(LLMConfig):
 class AnthropicModel(Enum):
   CLAUDE_3_5_SONNET_20240620="claude-3-5-sonnet-20240620"
 
-class AnthropicConfig(LLMConfig):
+class AnthropicConfig(_LLMConfig):
   base_url: str
   api_key: str
   chat_completion_path: Optional[str] ="/v1/messages"
