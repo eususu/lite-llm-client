@@ -14,5 +14,5 @@ messages = [
 
 answer = client.chat_completions(messages=messages)
 
-logging.info("asdf {}".format(answer))
+logging.info("{}".format(answer))
 
