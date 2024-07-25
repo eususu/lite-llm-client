@@ -4,7 +4,6 @@ from llm_client.config import LLMConfig, OpenAIConfig
 from llm_client.interfaces import LLMClient, LLMMessage
 from llm_client.openai_client import OpenAIClient
 
-
 class LiteLLMClient():
   config:LLMConfig
   client:LLMClient

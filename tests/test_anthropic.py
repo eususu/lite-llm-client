@@ -6,7 +6,7 @@ from llm_client.lite_llm_client import LiteLLMClient
 
 logging.basicConfig(level='debug')
 
-client = LiteLLMClient(AnthropicConfig(model=AnthropicModel.A))
+client = LiteLLMClient(AnthropicConfig(model=AnthropicModel.CLAUDE_3_5_SONNET_20240620))
 
 messages = [
   LLMMessage(role=LLMMessageRole.USER, content="hello")
