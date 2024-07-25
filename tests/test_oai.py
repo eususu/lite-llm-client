@@ -1,7 +1,7 @@
 import logging
-from llm_client.config import OpenAIConfig, OpenAIModel
-from llm_client.interfaces import LLMMessage, LLMMessageRole
-from llm_client.lite_llm_client import LiteLLMClient
+from llm_client._config import OpenAIConfig, OpenAIModel
+from llm_client._interfaces import LLMMessage, LLMMessageRole
+from llm_client._lite_llm_client import LiteLLMClient
 
 client = LiteLLMClient(OpenAIConfig(
   model=OpenAIModel.GPT_4_O

@@ -1,8 +1,8 @@
 import logging
-from llm_client.anthropic_client import AnthropicConfig 
-from llm_client.config import AnthropicModel
-from llm_client.interfaces import LLMMessage, LLMMessageRole
-from llm_client.lite_llm_client import LiteLLMClient
+from llm_client._anthropic_client import AnthropicConfig 
+from llm_client._config import AnthropicModel
+from llm_client._interfaces import LLMMessage, LLMMessageRole
+from llm_client._lite_llm_client import LiteLLMClient
 
 logging.basicConfig(level='debug')
 

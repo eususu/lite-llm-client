@@ -1,16 +1,15 @@
-import logging
 import os
+import logging
 from typing import List
-
+from llm_client._config import OpenAIConfig
 import requests
-from llm_client.config import AnthropicConfig
-from llm_client.interfaces import LLMMessage, LLMMessageRole
 
+from llm_client._interfaces import LLMMessage, LLMMessageRole
 
-class _AnthropicClient():
-  config: AnthropicConfig
-  
-  def __init__(self, config:AnthropicConfig):
+class _OpenAIClient():
+  config:OpenAIConfig
+
+  def __init__(self, config:OpenAIConfig):
     self.config = config
 
   def chat_completions(self, messages:List[LLMMessage]):
@@ -30,7 +29,6 @@ class _AnthropicClient():
 
     request = {
       "model": self.config.model.value,
-      'max_tokens': self.config.max_tokens,
       "messages": msgs,
       "temperature": 0.0
     }
@@ -39,11 +37,7 @@ class _AnthropicClient():
 
     http_response = requests.api.post(
       self.config.get_chat_completion_url(),
-      headers={
-        'Content-Type': 'application/json',
-        'x-api-key': f'{self.config.api_key}',
-        'anthropic-version': '2023-06-01',
-        },
+      headers={'Content-Type': 'application/json', 'Authorization': f'Bearer {self.config.api_key}'},
       json=request
       )
 
@@ -53,5 +47,5 @@ class _AnthropicClient():
     response = http_response.json()
     logging.info(f'response={response}')
 
-    content = response['content'][0]
-    return content['text']
+    choices = response['choices']
+    return choices[0]["message"]["content"]
