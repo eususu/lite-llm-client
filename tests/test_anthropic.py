@@ -12,6 +12,7 @@ def test_oai():
   client = LiteLLMClient(AnthropicConfig(model=AnthropicModel.CLAUDE_3_5_SONNET_20240620))
 
   messages = [
+    LLMMessage(role=LLMMessageRole.SYSTEM, content="you are helpful assistant."),
     LLMMessage(role=LLMMessageRole.USER, content="hello")
   ]
 

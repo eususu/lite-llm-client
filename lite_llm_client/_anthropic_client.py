@@ -3,7 +3,7 @@ from typing import List
 
 import requests
 from lite_llm_client._config import AnthropicConfig
-from lite_llm_client._interfaces import LLMMessage, LLMMessageRole
+from lite_llm_client._interfaces import InferenceOptions, LLMMessage, LLMMessageRole
 
 
 class AnthropicClient():
@@ -12,14 +12,16 @@ class AnthropicClient():
   def __init__(self, config:AnthropicConfig):
     self.config = config
 
-  def chat_completions(self, messages:List[LLMMessage]):
+  def chat_completions(self, messages:List[LLMMessage], options:InferenceOptions=InferenceOptions()):
     msgs = []
+    system_prompt = []
     for msg in messages:
       role = None
       if msg.role == LLMMessageRole.USER:
         role = "user"
       elif msg.role == LLMMessageRole.SYSTEM:
-        role = "system"
+        system_prompt.append(msg.content)
+        continue
       elif msg.role == LLMMessageRole.ASSISTANT:
         role = "assistant"
       else:
@@ -27,12 +29,25 @@ class AnthropicClient():
 
       msgs.append({"role": role, "content": msg.content})
 
+    """
+    https://docs.anthropic.com/en/api/messages
+    
+    system_prompt does not include messages.
+    """
     request = {
       "model": self.config.model.value,
       'max_tokens': self.config.max_tokens,
       "messages": msgs,
-      "temperature": 0.0
+      "temperature": options.temperature,
     }
+
+    if len(system_prompt) > 0:
+      request['system'] = "\n".join(system_prompt)
+
+    if options.top_k:
+      request['top_k'] = options.top_k
+    if options.top_p:
+      request['top_p'] = options.top_p
 
     logging.info(f'request={request}')
 

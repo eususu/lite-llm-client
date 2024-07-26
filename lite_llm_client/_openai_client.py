@@ -4,7 +4,7 @@ from typing import List
 from lite_llm_client._config import OpenAIConfig
 import requests
 
-from lite_llm_client._interfaces import LLMMessage, LLMMessageRole
+from lite_llm_client._interfaces import InferenceOptions, LLMMessage, LLMMessageRole
 
 class OpenAIClient():
   config:OpenAIConfig
@@ -12,7 +12,7 @@ class OpenAIClient():
   def __init__(self, config:OpenAIConfig):
     self.config = config
 
-  def chat_completions(self, messages:List[LLMMessage]):
+  def chat_completions(self, messages:List[LLMMessage], options:InferenceOptions=InferenceOptions()):
     msgs = []
     for msg in messages:
       role = None
@@ -30,7 +30,7 @@ class OpenAIClient():
     request = {
       "model": self.config.model.value,
       "messages": msgs,
-      "temperature": 0.0
+      "temperature": options.temperature,
     }
 
     logging.info(f'request={request}')

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 
 @dataclass
@@ -19,7 +19,12 @@ class LLMMessage(BaseModel):
   role: LLMMessageRole
   content: str
 
+class InferenceOptions(BaseModel):
+  top_p:Optional[float]=None
+  top_k:Optional[float]=None
+  temperature:float=0.0
+
 class LLMClient(ABC):
   @abstractmethod
-  def chat_completions(self, messages:List[LLMMessage]):
+  def chat_completions(self, messages:List[LLMMessage], options:InferenceOptions=InferenceOptions()):
     raise NotImplementedError
