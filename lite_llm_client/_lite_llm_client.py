@@ -1,20 +1,20 @@
 from typing import List
-from lite_llm_client._anthropic_client import _AnthropicClient, AnthropicConfig
-from lite_llm_client._config import _LLMConfig, OpenAIConfig
-from lite_llm_client._interfaces import _LLMClient, LLMMessage
-from lite_llm_client._openai_client import _OpenAIClient
+from lite_llm_client._anthropic_client import AnthropicClient
+from lite_llm_client._config import _LLMConfig, OpenAIConfig, AnthropicConfig
+from lite_llm_client._interfaces import LLMClient, LLMMessage
+from lite_llm_client._openai_client import OpenAIClient
 
 class LiteLLMClient():
   config:_LLMConfig
-  client:_LLMClient
+  client:LLMClient
 
   def __init__(self, config:_LLMConfig):
     self.config = config
 
     if isinstance(config, OpenAIConfig):
-      self.client = _OpenAIClient(config)
+      self.client = OpenAIClient(config)
     elif isinstance(config, AnthropicConfig):
-      self.client = _AnthropicClient(config)
+      self.client = AnthropicClient(config)
     
 
   def chat_completions(self, messages:List[LLMMessage]):

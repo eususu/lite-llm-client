@@ -11,6 +11,6 @@ class LLMMessage(BaseModel):
   role: LLMMessageRole
   content: str
 
-class _LLMClient:
+class LLMClient:
   def chat_completions(self, messages:List[LLMMessage]):
     pass

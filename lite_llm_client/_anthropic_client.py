@@ -6,7 +6,7 @@ from lite_llm_client._config import AnthropicConfig
 from lite_llm_client._interfaces import LLMMessage, LLMMessageRole
 
 
-class _AnthropicClient():
+class AnthropicClient():
   config: AnthropicConfig
   
   def __init__(self, config:AnthropicConfig):

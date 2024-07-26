@@ -6,7 +6,7 @@ import requests
 
 from lite_llm_client._interfaces import LLMMessage, LLMMessageRole
 
-class _OpenAIClient():
+class OpenAIClient():
   config:OpenAIConfig
 
   def __init__(self, config:OpenAIConfig):
