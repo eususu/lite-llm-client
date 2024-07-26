@@ -7,6 +7,8 @@ name = "pypi"
 requests = "*"
 python-dotenv = "*"
 pydantic = "*"
+build = "*"
+lite-llm-client = {file = ".", editable = true}
 
 [dev-packages]
 

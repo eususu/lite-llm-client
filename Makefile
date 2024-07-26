@@ -1,7 +1,17 @@
 all:
-	pytest tests/test_anthropic.py
-#pytest
 
+test:
+	pytest
+
+test_oai:
+	pytest tests/test_oai.py
+
+test_anthropic:
+	pytest tests/test_anthropic.py
+
+
+nm:
+	python -c 'import lite_llm_client; print("\n".join(dir(lite_llm_client)))'
 build:
 	python -m build
 	pip install -e .
