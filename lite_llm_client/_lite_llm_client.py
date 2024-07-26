@@ -1,14 +1,14 @@
 from typing import List
 from lite_llm_client._anthropic_client import AnthropicClient
-from lite_llm_client._config import _LLMConfig, OpenAIConfig, AnthropicConfig
+from lite_llm_client._config import LLMConfig, OpenAIConfig, AnthropicConfig
 from lite_llm_client._interfaces import LLMClient, LLMMessage
 from lite_llm_client._openai_client import OpenAIClient
 
 class LiteLLMClient():
-  config:_LLMConfig
+  config:LLMConfig
   client:LLMClient
 
-  def __init__(self, config:_LLMConfig):
+  def __init__(self, config:LLMConfig):
     self.config = config
 
     if isinstance(config, OpenAIConfig):

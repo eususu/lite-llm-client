@@ -1,25 +1,18 @@
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
 import os
 from dotenv import load_dotenv
 from enum import Enum
 from typing import Optional
-from pydantic import BaseModel
+
+from lite_llm_client._interfaces import LLMConfig
 
 # load .env
 load_dotenv()
 
+###################################################
 class OpenAIModel(Enum):
   GPT_4_O = "gpt-4o"
 
-@dataclass
-class _LLMConfig(ABC):
-  @abstractmethod
-  def get_chat_completion_url(self)->str:
-    raise NotImplementedError
-
-###################################################
-class OpenAIConfig(_LLMConfig):
+class OpenAIConfig(LLMConfig):
   base_url: str
   api_key: str
   chat_completion_path: Optional[str] ="/v1/chat/completions"
@@ -47,7 +40,7 @@ class OpenAIConfig(_LLMConfig):
 class AnthropicModel(Enum):
   CLAUDE_3_5_SONNET_20240620="claude-3-5-sonnet-20240620"
 
-class AnthropicConfig(_LLMConfig):
+class AnthropicConfig(LLMConfig):
   base_url: str
   api_key: str
   chat_completion_path: Optional[str] ="/v1/messages"
