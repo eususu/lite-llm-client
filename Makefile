@@ -1,4 +1,4 @@
-all: test_gemini
+all:
 
 test:
 	pytest
