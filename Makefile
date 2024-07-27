@@ -1,4 +1,4 @@
-all:
+all: test_gemini
 
 test:
 	pytest
@@ -8,6 +8,9 @@ test_oai:
 
 test_anthropic:
 	pytest tests/test_anthropic.py
+
+test_gemini:
+	pytest tests/test_gemini.py
 
 
 nm:

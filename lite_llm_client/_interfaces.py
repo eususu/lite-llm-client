@@ -22,6 +22,7 @@ class LLMMessage(BaseModel):
 class InferenceOptions(BaseModel):
   top_p:Optional[float]=None
   top_k:Optional[float]=None
+  max_tokens: Optional[int]=None
   temperature:float=0.0
 
 class LLMClient(ABC):

@@ -65,3 +65,36 @@ class AnthropicConfig(LLMConfig):
 
   def get_chat_completion_url(self)->str:
     return f'{self.base_url}{self.chat_completion_path}'
+
+###################################################
+class GeminiModel(Enum):
+  GEMINI_1_5_FLASH="gemini-1.5-flash"
+
+class GeminiConfig(LLMConfig):
+  base_url: str
+  api_key: str
+  chat_completion_path: Optional[str] ="/v1beta/models"
+  model:str
+
+  max_tokens:int=1024
+
+  def __init__(self,
+               base_url:str="https://generativelanguage.googleapis.com",
+               api_key:str=None,
+               model:GeminiModel|str=GeminiModel.GEMINI_1_5_FLASH):
+    """
+    parameters
+    - api_key: if None, use environment variable "ANTHROPIC_API_KEY"
+    """
+
+    self.base_url = base_url
+    self.api_key = api_key
+    if not self.api_key and "GEMINI_API_KEY" in os.environ:
+      self.api_key = os.environ["GEMINI_API_KEY"]
+    self.model = model.value
+
+    #if not self.api_key:
+    #  raise NotImplementedError()
+
+  def get_chat_completion_url(self)->str:
+    return f'{self.base_url}{self.chat_completion_path}/{self.model}'
