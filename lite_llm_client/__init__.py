@@ -4,6 +4,7 @@ from ._lite_llm_client import (
 from ._interfaces import (
   LLMMessage,
   LLMMessageRole,
+	InferenceOptions,
 )
 from ._config import (
   OpenAIModel,
