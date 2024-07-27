@@ -12,3 +12,4 @@ the main idea is `do not use llm client library`.
 - [ ] support streming (OpenAI)
 - [ ] support streming (Gemini)
 - [ ] support streming (Anthropic)
+- [ ] support multimodal (image and text)
