@@ -12,7 +12,8 @@ class GeminiClient():
   def __init__(self, config:GeminiConfig):
     self.config = config
 
-  def chat_completions(self, messages:List[LLMMessage], options:InferenceOptions=InferenceOptions(temperature=1.0, max_tokens=800, top_p=0.8, top_k=10)):
+  def chat_completions(self, messages:List[LLMMessage], options:InferenceOptions):
+    _options = options if options else InferenceOptions(temperature=1.0, max_tokens=800, top_p=0.8, top_k=10)
     msgs = []
     system_prompt = []
     for msg in messages:
@@ -31,10 +32,10 @@ class GeminiClient():
 
     
     generationConfig = {
-      "temperature": options.temperature,
-      "maxOutputTokens": options.max_tokens,
-      "topP": options.top_p,
-      "topK": options.top_k,
+      "temperature": _options.temperature,
+      "maxOutputTokens": _options.max_tokens,
+      "topP": _options.top_p,
+      "topK": _options.top_k,
     }
     request = {
       "contents": msgs,

@@ -12,7 +12,8 @@ class OpenAIClient():
   def __init__(self, config:OpenAIConfig):
     self.config = config
 
-  def chat_completions(self, messages:List[LLMMessage], options:InferenceOptions=InferenceOptions()):
+  def chat_completions(self, messages:List[LLMMessage], options:InferenceOptions):
+    _options = options if options else InferenceOptions()
     msgs = []
     for msg in messages:
       role = None
@@ -30,7 +31,7 @@ class OpenAIClient():
     request = {
       "model": self.config.model.value,
       "messages": msgs,
-      "temperature": options.temperature,
+      "temperature": _options.temperature,
     }
 
     logging.info(f'request={request}')

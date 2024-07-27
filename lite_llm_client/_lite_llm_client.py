@@ -2,7 +2,7 @@ from typing import List
 from lite_llm_client._anthropic_client import AnthropicClient
 from lite_llm_client._config import GeminiConfig, LLMConfig, OpenAIConfig, AnthropicConfig
 from lite_llm_client._gemini_client import GeminiClient
-from lite_llm_client._interfaces import LLMClient, LLMMessage
+from lite_llm_client._interfaces import InferenceOptions, LLMClient, LLMMessage
 from lite_llm_client._openai_client import OpenAIClient
 
 class LiteLLMClient():
@@ -24,11 +24,11 @@ class LiteLLMClient():
     #  raise NotImplementedError()
     
 
-  def chat_completions(self, messages:List[LLMMessage]):
+  def chat_completions(self, messages:List[LLMMessage], options:InferenceOptions=None):
     r"""chat completions
     
     :param messages: messages
     :param options: (optional) options for chat completions
 
     """
-    return self.client.chat_completions(messages=messages)
+    return self.client.chat_completions(messages=messages, options=options)

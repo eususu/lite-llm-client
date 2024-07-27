@@ -27,5 +27,5 @@ class InferenceOptions(BaseModel):
 
 class LLMClient(ABC):
   @abstractmethod
-  def chat_completions(self, messages:List[LLMMessage], options:InferenceOptions=InferenceOptions()):
+  def chat_completions(self, messages:List[LLMMessage], options:InferenceOptions):
     raise NotImplementedError

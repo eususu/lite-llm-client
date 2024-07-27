@@ -12,7 +12,8 @@ class AnthropicClient():
   def __init__(self, config:AnthropicConfig):
     self.config = config
 
-  def chat_completions(self, messages:List[LLMMessage], options:InferenceOptions=InferenceOptions()):
+  def chat_completions(self, messages:List[LLMMessage], options:InferenceOptions):
+    _options = options if options else InferenceOptions()
     msgs = []
     system_prompt = []
     for msg in messages:
@@ -38,16 +39,16 @@ class AnthropicClient():
       "model": self.config.model.value,
       'max_tokens': self.config.max_tokens,
       "messages": msgs,
-      "temperature": options.temperature,
+      "temperature": _options.temperature,
     }
 
     if len(system_prompt) > 0:
       request['system'] = "\n".join(system_prompt)
 
-    if options.top_k:
-      request['top_k'] = options.top_k
-    if options.top_p:
-      request['top_p'] = options.top_p
+    if _options.top_k:
+      request['top_k'] = _options.top_k
+    if _options.top_p:
+      request['top_p'] = _options.top_p
 
     logging.info(f'request={request}')
 
