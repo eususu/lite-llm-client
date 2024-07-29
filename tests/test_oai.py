@@ -15,7 +15,12 @@ def test_oai():
     LLMMessage(role=LLMMessageRole.USER, content="hello")
   ]
 
-  answer = client.chat_completions(messages=messages)
+  answer = client.async_chat_completions(messages=messages)
+  for a in answer:
+    print(a)
 
+  answer = client.chat_completions(messages=messages)
+  for a in answer:
+    print(a)
   logging.info("{}".format(answer))
 
