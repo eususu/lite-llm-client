@@ -32,12 +32,8 @@ def decode_sse(response:Response, data_type:SSEDataType, eoe:str='[DONE]')->Iter
 
   current_event = None
   for line in response.iter_lines(delimiter=b'\n'):
-    """
-    @CHECK: delimiter changed from '\n\n' to '\n' becauseof just working.
-    it may cause unintented work.
-    see SSE specification about event with data.
-    """
     if len(line) == 0:
+      # SKIP empty line
       continue
 
     parsed_line = _parse_sse(line)
