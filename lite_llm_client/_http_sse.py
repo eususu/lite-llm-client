@@ -16,7 +16,7 @@ class SSEDataType(Enum):
 def _parse_sse(line:bytes):
   first_comma = line.find(b': ', 0)
   if first_comma == -1:
-    raise ValueError('sse parse error (1)')
+    raise ValueError(f'sse parse error (1)##{line}')
 
   name = line[:first_comma] 
   value = line[first_comma+2:]
@@ -28,14 +28,30 @@ def decode_sse(response:Response, data_type:SSEDataType, eoe:str='[DONE]')->Iter
   ct_values = ct.split(';')
   assert ct_values[0] == 'text/event-stream', "response content-type does not 'text/event-stream '"
 
-  logging.info(f'[Response] Content-Type: {ct}')
-  for line in response.iter_lines(delimiter=b'\n\n'):
+  #logging.debug(f'[Response] Content-Type: {ct}')
+
+  current_event = None
+  for line in response.iter_lines(delimiter=b'\n'):
+    """
+    @CHECK: delimiter changed from '\n\n' to '\n' becauseof just working.
+    it may cause unintented work.
+    see SSE specification about event with data.
+    """
+    if len(line) == 0:
+      continue
+
     parsed_line = _parse_sse(line)
 
+    if parsed_line[0] == 'event':
+      #logging.debug(f'got event: {parsed_line[1]}')
+      current_event = parsed_line[0]
+      continue
+
     if parsed_line[0] == 'data' and parsed_line[1] == eoe:
-      logging.info("END OF EVENT")
+      #logging.debug("END OF EVENT")
       break
-    #logging.info(f'response line={parsed_line}')
+
+    #logging.debug(f'event({current_event}), value({parsed_line[1]})')
 
     value:str
     if SSEDataType.JSON == data_type:

@@ -40,6 +40,7 @@ class OpenAIConfig(LLMConfig):
 ###################################################
 class AnthropicModel(Enum):
   CLAUDE_3_5_SONNET_20240620="claude-3-5-sonnet-20240620"
+  CLAUDE_3_OPUS_20240229="claude-3-opus-20240229"
 
 class AnthropicConfig(LLMConfig):
   base_url: str

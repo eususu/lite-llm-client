@@ -10,6 +10,6 @@ the main idea is `do not use llm client library`.
 - [x] `2024-07-27` add options for inference
 - [x] `2024-07-28` support Gemini
 - [x] `2024-07-30` support streaming (OpenAI). simple SSE implement.
+- [x] `2024-07-31` support streaming (Anthropic). bad SSE implement for just working.
 - [ ] support streaming (Gemini)
-- [ ] support streaming (Anthropic)
 - [ ] support multimodal (image and text)
