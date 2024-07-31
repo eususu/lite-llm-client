@@ -72,11 +72,12 @@ class AnthropicConfig(LLMConfig):
 ###################################################
 class GeminiModel(Enum):
   GEMINI_1_5_FLASH="gemini-1.5-flash"
+  GEMINI_1_5_PRO="gemini-1.5-pro"
 
 class GeminiConfig(LLMConfig):
   base_url: str
   api_key: str
-  chat_completion_path: Optional[str] ="/v1beta/models"
+  chat_completion_path: Optional[str] ="/v1/models"
   model:str
 
   max_tokens:int=1024

@@ -1,4 +1,4 @@
-all: test_anthropic
+all:
 
 test:
 	pytest

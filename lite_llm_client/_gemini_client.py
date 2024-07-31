@@ -1,9 +1,10 @@
 import logging
-from typing import List
+from typing import Iterator, List
 
 import requests
 from lite_llm_client._config import GeminiConfig
-from lite_llm_client._interfaces import InferenceOptions, LLMMessage, LLMMessageRole
+from lite_llm_client._http_sse import SSEDataType, decode_sse
+from lite_llm_client._interfaces import LLMMessageRole, LLMMessage, InferenceOptions, InferenceOptions, LLMMessage, LLMMessageRole
 
 
 class GeminiClient():
@@ -12,7 +13,7 @@ class GeminiClient():
   def __init__(self, config:GeminiConfig):
     self.config = config
 
-  def chat_completions(self, messages:List[LLMMessage], options:InferenceOptions):
+  def _make_and_send_request(self, messages:List[LLMMessage], options:InferenceOptions, use_sse=False)->requests.Response:
     _options = options if options else InferenceOptions(temperature=1.0, max_tokens=800, top_p=0.8, top_k=10)
     msgs = []
     system_prompt = []
@@ -46,8 +47,15 @@ class GeminiClient():
       request['system'] = "\n".join(system_prompt)
 
     logging.info(f'request={request}')
+
+    action = 'generateContent'
+    alt = ''
+    if use_sse:
+      action = 'streamGenerateContent'
+      alt = 'alt=sse&'
+    url = f'{self.config.get_chat_completion_url()}:{action}?{alt}key={self.config.api_key}'
     http_response = requests.api.post(
-      f'{self.config.get_chat_completion_url()}:generateContent?key={self.config.api_key}',
+      url,
       headers={
         'Content-Type': 'application/json',
         },
@@ -55,10 +63,26 @@ class GeminiClient():
       )
 
     if http_response.status_code != 200:
-      logging.fatal(f'response={http_response.text}')
+      logging.fatal(f'status_code={http_response.status_code} response={http_response.text}')
       raise Exception(f'bad status_code: {http_response.status_code}')
+
+    return http_response
+
+  def async_chat_completions(self, messages:List[LLMMessage], options:InferenceOptions)->Iterator[str]:
+    http_response = self._make_and_send_request(messages=messages, options=options, use_sse=True)
+
+    for event in decode_sse(response=http_response, data_type=SSEDataType.JSON):
+
+      """ value example:
+      {"candidates": [{"content": {"parts": [{"text": " project's source code, organized into folders and files.\n* **Documentation:**  Some projects have a dedicated \"docs\" folder or a link to external documentation.\n* **Issues:**  This section lists any reported problems or feature"}],"role": "model"},"finishReason": "STOP","index": 0,"safetyRatings": [{"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT","probability": "NEGLIGIBLE"},{"category": "HARM_CATEGORY_HATE_SPEECH","probability": "NEGLIGIBLE"},{"category": "HARM_CATEGORY_HARASSMENT","probability": "NEGLIGIBLE"},{"category": "HARM_CATEGORY_DANGEROUS_CONTENT","probability": "NEGLIGIBLE"}]}],"usageMetadata": {"promptTokenCount": 45,"candidatesTokenCount": 192,"totalTokenCount": 237}}
+      """
+      content = event.event_value['candidates'][0]['content']['parts'][0]
+      char = content['text']
+      yield char
+
+  def chat_completions(self, messages:List[LLMMessage], options:InferenceOptions):
+    http_response = self._make_and_send_request(messages=messages, options=options)
     response = http_response.json()
-    logging.info(f'response={response}')
 
     content = response['candidates'][0]['content']['parts'][0]
     return content['text']

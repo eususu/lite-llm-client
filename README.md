@@ -11,5 +11,5 @@ the main idea is `do not use llm client library`.
 - [x] `2024-07-28` support Gemini
 - [x] `2024-07-30` support streaming (OpenAI). simple SSE implement.
 - [x] `2024-07-31` support streaming (Anthropic).
-- [ ] support streaming (Gemini)
+- [x] `2024-08-01` support streaming (Gemini). unstable google gemini.
 - [ ] support multimodal (image and text)

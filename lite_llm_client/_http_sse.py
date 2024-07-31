@@ -26,21 +26,22 @@ def _parse_sse(line:bytes):
 def decode_sse(response:Response, data_type:SSEDataType, eoe:str='[DONE]')->Iterator[SSEEvent]:
   ct = response.headers.get('Content-Type') # Content-Type: text/event-stream; utf-8
   ct_values = ct.split(';')
-  assert ct_values[0] == 'text/event-stream', "response content-type does not 'text/event-stream '"
+  assert ct_values[0] == 'text/event-stream', f"response content-type does not 'text/event-stream' but '{ct_values[0]}'"
 
-  #logging.debug(f'[Response] Content-Type: {ct}')
-
-  current_event = None
+  #current_event = None
   for line in response.iter_lines(delimiter=b'\n'):
     if len(line) == 0:
       # SKIP empty line
+      continue
+    if line == b'\r':
+      # for gemini.. maybe data delimiter is \r\n
       continue
 
     parsed_line = _parse_sse(line)
 
     if parsed_line[0] == 'event':
       #logging.debug(f'got event: {parsed_line[1]}')
-      current_event = parsed_line[0]
+      #current_event = parsed_line[0]
       continue
 
     if parsed_line[0] == 'data' and parsed_line[1] == eoe:
