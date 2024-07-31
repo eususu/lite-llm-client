@@ -1,13 +1,13 @@
 from enum import Enum, auto
 import json
 import logging
-from typing import Iterator
+from typing import Iterator, Union
 from pydantic import BaseModel
 from requests import Response
 
 class SSEEvent(BaseModel):
   event_name:str
-  event_value:str|dict
+  event_value:Union[str,dict]
 
 class SSEDataType(Enum):
   TEXT=auto()
