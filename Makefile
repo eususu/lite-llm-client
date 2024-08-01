@@ -15,6 +15,13 @@ test_gemini:
 
 nm:
 	python -c 'import lite_llm_client; print("\n".join(dir(lite_llm_client)))'
+
 build:
 	python -m build
 	pip install -e .
+
+check:
+	twine check dist/*
+
+upload_test:
+	twine upload -r testpypi dist/*
