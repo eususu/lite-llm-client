@@ -3,6 +3,24 @@
 This project made for very light llm client.
 the main idea is `do not use llm client library`.
 
+# setup
+
+## How to pass API_KEY
+
+1. use parameter of LLMConfig
+```python
+LiteLLMClient(OpenAIConfig(api_key="YOUR API KEY"))
+```
+2. use .env
+    - rename `.env_example` to `.env`
+    - replace YOUR KEY to real api_key
+
+```bash
+OPENAI_API_KEY=YOUR KEY
+ANTHROPIC_API_KEY=YOUR KEY
+GEMINI_API_KEY=YOUR KEY
+```
+
 
 # Known issue
 
