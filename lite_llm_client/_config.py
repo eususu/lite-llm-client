@@ -10,7 +10,9 @@ load_dotenv()
 
 ###################################################
 class OpenAIModel(Enum):
-  GPT_4_O = "gpt-4o"
+  GPT_4O = "gpt-4o"
+  GPT_4O_MINI = "gpt-4o-mini"
+  GPT_4_TURBO = "gpt-4-turbo"
 
 class OpenAIConfig(LLMConfig):
   base_url: str
@@ -21,7 +23,7 @@ class OpenAIConfig(LLMConfig):
   def __init__(self,
                base_url:str="https://api.openai.com",
                api_key:str=None,
-               model:Union[OpenAIModel,str]=OpenAIModel.GPT_4_O):
+               model:Union[OpenAIModel,str]=OpenAIModel.GPT_4O):
     """
     parameters
     - api_key: if None, use environment variable "OPENAI_API_KEY"

@@ -11,7 +11,7 @@ from lite_llm_client._lite_llm_client import LiteLLMClient
 
 def gen_instance()->LiteLLMClient:
   client = LiteLLMClient(OpenAIConfig(
-    model=OpenAIModel.GPT_4_O
+    model=OpenAIModel.GPT_4O_MINI
     ))
 
   return client

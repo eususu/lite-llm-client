@@ -26,8 +26,11 @@ class InferenceOptions(BaseModel):
   temperature:float=0.0
 
 class LLMClient(ABC):
+
   @abstractmethod
   def chat_completions(self, messages:List[LLMMessage], options:InferenceOptions):
     raise NotImplementedError
-  def async_chat_completions(self, messages:List[LLMMessage], options:InferenceOptions=None)->Iterator[str]:
+
+  @abstractmethod
+  def async_chat_completions(self, messages:List[LLMMessage], options:InferenceOptions)->Iterator[str]:
     raise NotImplementedError
