@@ -9,6 +9,8 @@ from ._interfaces import (
 from ._config import (
   OpenAIModel,
   OpenAIConfig,
+  GeminiModel,
+  GeminiConfig,
   AnthropicModel,
   AnthropicConfig,
 )

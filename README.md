@@ -5,7 +5,7 @@ the main idea is `do not use llm client library`.
 
 # setup
 
-## How to pass API_KEY
+## How to pass `API_KEY`
 
 1. use parameter of LLMConfig
 ```python

@@ -25,3 +25,6 @@ check:
 
 upload_test:
 	twine upload -r testpypi dist/*
+
+upload:
+	twine upload dist/*

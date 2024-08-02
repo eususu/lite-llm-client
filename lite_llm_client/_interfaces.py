@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import List, Optional
+from typing import Iterator, List, Optional
 from pydantic import BaseModel
 
 @dataclass
@@ -28,4 +28,6 @@ class InferenceOptions(BaseModel):
 class LLMClient(ABC):
   @abstractmethod
   def chat_completions(self, messages:List[LLMMessage], options:InferenceOptions):
+    raise NotImplementedError
+  def async_chat_completions(self, messages:List[LLMMessage], options:InferenceOptions=None)->Iterator[str]:
     raise NotImplementedError
