@@ -40,4 +40,5 @@ GEMINI_API_KEY=YOUR KEY
 
 # Reference
 
+- [OpenAI REST API](https://platform.openai.com/docs/api-reference/chat/create)
 - [Gemini REST API](https://ai.google.dev/gemini-api/docs/get-started/tutorial?lang=rest)
