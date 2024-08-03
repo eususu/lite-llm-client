@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lite-llm-client"
-version = "0.0.3"
+version = "0.1.0"
 authors = [
   { name="lovian", email="belovian@gmail.com" },
 ]
@@ -30,7 +30,7 @@ dev = ["black", "bumpver", "isort", "pip-tools", "pytest"]
 Homepage = "https://github.com/eususu/lite-llm-client"
 
 [tool.bumpver]
-current_version = "0.0.3"
+current_version = "0.1.0"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message = "bump version {old_version} -> {new_version}"
 tag_message = "{new_version}"
@@ -45,10 +45,6 @@ push = true
 "pyproject.toml" = [
     'version = "{version}"',
     'current_version = "{version}"',
-]
-"README.md" = [
-    "{version}",
-    "{pep440_version}",
 ]
 
 
