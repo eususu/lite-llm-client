@@ -9,7 +9,12 @@ the main idea is `do not use any llm client library`.
 
 1. use parameter of LLMConfig
 ```python
-LiteLLMClient(OpenAIConfig(api_key="YOUR API KEY"))
+from lite_llm_client import LiteLLMClient, OpenAIConfig, LLMMessage, LLMMessageRole
+
+client = LiteLLMClient(OpenAIConfig(api_key="YOUR API KEY"))
+answer = client.chat_completions(messages=[LLMMessage(role=LLMMessage.USER, content="hello ai?")])
+
+print(answer)
 ```
 2. use .env
     - rename `.env_example` to `.env`
@@ -28,6 +33,10 @@ GEMINI_API_KEY=YOUR KEY
 
 # Roadmap
 
+## Future version
+- [ ] support multimodal (image and text)
+
+## 0.1.0
 - [x] `2024-07-21` support OpenAI
 - [x] `2024-07-25` support Anthropic
 - [x] `2024-07-27` add options for inference
@@ -35,7 +44,7 @@ GEMINI_API_KEY=YOUR KEY
 - [x] `2024-07-30` support streaming (OpenAI). simple SSE implement.
 - [x] `2024-07-31` support streaming (Anthropic).
 - [x] `2024-08-01` support streaming (Gemini). unstable google gemini.
-- [ ] support multimodal (image and text)
+
 
 
 # Reference
