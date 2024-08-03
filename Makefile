@@ -14,7 +14,7 @@ test_gemini:
 
 
 nm:
-	python -c 'import lite_llm_client; print("\n".join(dir(lite_llm_client)))'
+	@python -c 'import lite_llm_client; exports = list(filter(lambda x: x.find("_") == -1, dir(lite_llm_client))); print("\n".join(exports));'
 
 build:
 	python -m build

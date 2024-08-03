@@ -1,7 +1,7 @@
-# lite llm client
+# Lite LLM Client
 
 This project made for very light llm client.
-the main idea is `do not use llm client library`.
+the main idea is `do not use any llm client library`.
 
 # setup
 
