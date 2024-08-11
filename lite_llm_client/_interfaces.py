@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import Iterator, List, Optional
+from typing import Iterator, List, Literal, Optional
 from pydantic import BaseModel
 
 @dataclass
@@ -19,11 +19,19 @@ class LLMMessage(BaseModel):
   role: LLMMessageRole
   content: str
 
+class InferenceResult(BaseModel):
+  finish_reason:Literal['empty', 'stop']='empty'
+  prompt_tokens:int=0
+  completion_tokens:int=0
+  total_tokens:int=0
+
 class InferenceOptions(BaseModel):
   top_p:Optional[float]=None
   top_k:Optional[float]=None
   max_tokens: Optional[int]=None
   temperature:float=0.0
+  inference_result:InferenceResult=InferenceResult()
+
 
 class LLMClient(ABC):
 

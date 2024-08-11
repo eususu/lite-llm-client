@@ -4,10 +4,10 @@ from typing import Iterator, List
 import requests
 from lite_llm_client._config import AnthropicConfig
 from lite_llm_client._http_sse import SSEDataType, decode_sse
-from lite_llm_client._interfaces import InferenceOptions, LLMMessage, LLMMessageRole
+from lite_llm_client._interfaces import InferenceOptions, LLMClient, LLMMessage, LLMMessageRole
 
 
-class AnthropicClient():
+class AnthropicClient(LLMClient):
   config: AnthropicConfig
   
   def __init__(self, config:AnthropicConfig):

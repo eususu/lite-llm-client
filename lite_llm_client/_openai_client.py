@@ -3,10 +3,10 @@ from typing import Iterator, List
 from lite_llm_client._config import OpenAIConfig
 import requests
 
-from lite_llm_client._interfaces import InferenceOptions, LLMMessage, LLMMessageRole
+from lite_llm_client._interfaces import InferenceOptions, InferenceResult, LLMClient, LLMMessage, LLMMessageRole
 from lite_llm_client._http_sse import SSEDataType, decode_sse
 
-class OpenAIClient():
+class OpenAIClient(LLMClient):
   config:OpenAIConfig
 
   def __init__(self, config:OpenAIConfig):
@@ -52,7 +52,38 @@ class OpenAIClient():
 
     return http_response
 
+  
+  
+  def _parse_response(self, inference_result:InferenceResult, response:dict):
+
+    choices0 = response['choices'][0]
+    inference_result.finish_reason = choices0['finish_reason']
+
+    if 'usage' in response:
+      usage = response['usage']
+      inference_result.prompt_tokens = usage['prompt_tokens']
+      inference_result.completion_tokens = usage['completion_tokens']
+      inference_result.total_tokens = usage['total_tokens']
+
+    logging.info(inference_result)
+
+  def _parse_async_response(self, inference_result:InferenceResult, response:dict)->str:
+    choices0 = response['choices'][0]
+    finish_reason = choices0['finish_reason']
+    if finish_reason is not None:
+      inference_result.finish_reason = finish_reason
+
+    delta = choices0['delta']
+    if 'content' in delta:
+      char = delta['content']
+      inference_result.completion_tokens += len(char)
+      inference_result.total_tokens += len(char)
+      return char
+    return None
+
   def async_chat_completions(self, messages:List[LLMMessage], options:InferenceOptions)->Iterator[str]:
+    # TODO: count prompt length
+    
     http_response = self._make_and_send_request(messages=messages, options=options, use_sse=True)
 
     for event in decode_sse(http_response, data_type=SSEDataType.JSON):
@@ -60,14 +91,12 @@ class OpenAIClient():
       value example:
       {'id': 'chatcmpl-9qLv6AAbMZcZudyYUJ2SsSYGZs16y', 'object': 'chat.completion.chunk', 'created': 1722264344, 'model': 'gpt-4o-2024-05-13', 'system_fingerprint': 'fp_400f27fa1f', 'choices': [{'index': 0, 'delta': {'role': 'assistant', 'content': ''}, 'logprobs': None, 'finish_reason': None}]}
       """
-      delta = event.event_value['choices'][0]['delta']
-      if 'content' in delta:
-        char = delta['content']
-        logging.debug(char)
+      char = self._parse_async_response(inference_result=options.inference_result, response=event.event_value)
+
+      if char:
         yield char
-        # CHECK: first token is empty. is useful??
       else:
-        # maybe last data?
+        # may be last?
         pass
 
 
@@ -75,6 +104,9 @@ class OpenAIClient():
     http_response = self._make_and_send_request(messages=messages, options=options)
     response = http_response.json()
     #logging.info(f'response={response}')
+
+    if options is not None and options.inference_result is not None:
+      self._parse_response(options.inference_result, response)
 
     choices = response['choices']
     return choices[0]["message"]["content"]

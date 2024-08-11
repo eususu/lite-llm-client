@@ -4,10 +4,10 @@ from typing import Iterator, List
 import requests
 from lite_llm_client._config import GeminiConfig
 from lite_llm_client._http_sse import SSEDataType, decode_sse
-from lite_llm_client._interfaces import LLMMessageRole, LLMMessage, InferenceOptions, InferenceOptions, LLMMessage, LLMMessageRole
+from lite_llm_client._interfaces import LLMClient, LLMMessageRole, LLMMessage, InferenceOptions, InferenceOptions, LLMMessage, LLMMessageRole
 
 
-class GeminiClient():
+class GeminiClient(LLMClient):
   config: GeminiConfig
   
   def __init__(self, config:GeminiConfig):
