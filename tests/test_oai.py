@@ -23,6 +23,7 @@ def test_oai_sync():
 
   answer = client.chat_completions(messages=get_test_messages(), options=options)
   logging.info("{}".format(answer))
+  logging.info(options.inference_result)
 
 def test_oai_async():
   client = gen_instance()

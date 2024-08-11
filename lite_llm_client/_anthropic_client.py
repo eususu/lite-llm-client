@@ -4,7 +4,7 @@ from typing import Iterator, List
 import requests
 from lite_llm_client._config import AnthropicConfig
 from lite_llm_client._http_sse import SSEDataType, decode_sse
-from lite_llm_client._interfaces import InferenceOptions, LLMClient, LLMMessage, LLMMessageRole
+from lite_llm_client._interfaces import InferenceOptions, InferenceResult, LLMClient, LLMMessage, LLMMessageRole
 
 
 class AnthropicClient(LLMClient):
@@ -70,10 +70,40 @@ class AnthropicClient(LLMClient):
 
     return http_response
 
+  def _parse_response(self, inference_result:InferenceResult, response:dict):
+    reason_map = {
+      'end_turn': 'stop'
+    }
+
+    if 'stop_reason' in response:
+      stop_reason = response['stop_reason']
+      inference_result.finish_reason = reason_map[stop_reason]
+
+    if 'delta' in response:
+      delta = response['delta']
+      if 'stop_reason' in delta:
+        stop_reason = delta['stop_reason']
+        inference_result.finish_reason = reason_map[stop_reason]
+
+    if 'usage' in response:
+      usage = response['usage']
+
+      if 'input_tokens' in usage:
+        inference_result.prompt_tokens = usage['input_tokens']
+
+      if 'output_tokens' in usage:
+        inference_result.completion_tokens = usage['output_tokens']
+
+      if inference_result.prompt_tokens > 0 and inference_result.completion_tokens > 0:
+        inference_result.total_tokens = inference_result.prompt_tokens + inference_result.completion_tokens
+
   def async_chat_completions(self, messages:List[LLMMessage], options:InferenceOptions)->Iterator[str]:
     http_response = self._make_and_send_request(messages=messages, options=options, use_sse=True)
 
     for event in decode_sse(http_response, data_type=SSEDataType.JSON):
+      #logging.info(event.event_value)
+      self._parse_response(options.inference_result, event.event_value)
+
       """
       event_value example:
       {"type":"message_start","message":{"id":"msg_01C4SDTbBPX6yQiFSrgnY8jD","type":"message","role":"assistant","model":"claude-3-opus-20240229","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":13,"output_tokens":3}}             }
@@ -109,9 +139,14 @@ class AnthropicClient(LLMClient):
         char = delta['text']
         yield char
 
+
   def chat_completions(self, messages:List[LLMMessage], options:InferenceOptions):
     http_response = self._make_and_send_request(messages=messages, options=options)
     response = http_response.json()
+
+    #logging.info(response)
+    if options is not None:
+      self._parse_response(options.inference_result, response)
 
     content = response['content'][0]
     return content['text']
