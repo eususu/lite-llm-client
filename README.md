@@ -44,6 +44,7 @@ GEMINI_API_KEY=YOUR KEY
 - [x] `2024-07-30` support streaming (OpenAI). simple SSE implement.
 - [x] `2024-07-31` support streaming (Anthropic).
 - [x] `2024-08-01` support streaming (Gemini). unstable google gemini.
+- [x] `2024-08-13` support inference result(token count, stop readon)
 
 
 

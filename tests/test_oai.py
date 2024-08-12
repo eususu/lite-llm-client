@@ -1,14 +1,12 @@
 import os
 import sys
 
-
 sys.path.append(os.path.abspath('.'))
 import logging
 from _share import get_test_messages
-from lite_llm_client._config import OpenAIConfig, OpenAIModel
+from lite_llm_client import OpenAIConfig, OpenAIModel
 from lite_llm_client import LiteLLMClient
 from lite_llm_client import InferenceOptions
-
 
 def gen_instance()->LiteLLMClient:
   client = LiteLLMClient(OpenAIConfig(
