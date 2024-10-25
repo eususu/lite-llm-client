@@ -12,6 +12,9 @@ def gen_instance()->LiteLLMClient:
   client = LiteLLMClient(GeminiConfig(
     model=GeminiModel.GEMINI_1_5_PRO
     ))
+  client = LiteLLMClient(GeminiConfig(
+    model='gemma-2-9b-it'
+    ))
 
   return client
 

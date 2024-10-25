@@ -99,7 +99,7 @@ class GeminiConfig(LLMConfig):
       self.api_key = os.environ["GEMINI_API_KEY"]
     
     assert self.api_key and len(self.api_key) > 0, "api_key must be exists(check argument or environment variable)"
-    self.model = model.value
+    self.model = model if isinstance(model, str) else model.value
 
     #if not self.api_key:
     #  raise NotImplementedError()
