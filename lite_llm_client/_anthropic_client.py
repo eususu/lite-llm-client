@@ -1,3 +1,4 @@
+from enum import Enum
 import logging
 from typing import Iterator, List
 
@@ -36,8 +37,9 @@ class AnthropicClient(LLMClient):
     
     system_prompt does not include messages.
     """
+    model_name = self.config.model.value if isinstance(self.config.model, Enum) else self.config.model
     request = {
-      "model": self.config.model.value,
+      "model": model_name,
       'max_tokens': self.config.max_tokens,
       "messages": msgs,
       "temperature": _options.temperature,

@@ -1,3 +1,4 @@
+from enum import Enum
 import logging
 from typing import Iterator, List
 from lite_llm_client._config import OpenAIConfig
@@ -29,8 +30,9 @@ class OpenAIClient(LLMClient):
 
       msgs.append({"role": role, "content": msg.content})
 
+    model_name = self.config.model.value if isinstance(self.config.model, Enum) else self.config.model
     request = {
-      "model": self.config.model.value,
+      "model": model_name,
       "messages": msgs,
       "temperature": _options.temperature,
     }
