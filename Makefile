@@ -3,6 +3,9 @@ all:
 test:
 	pytest
 
+test_minor:
+	pytest tests/test_minor.py
+
 test_oai:
 	pytest tests/test_oai.py
 
@@ -11,6 +14,7 @@ test_anthropic:
 
 test_gemini:
 	pytest tests/test_gemini.py
+
 
 
 nm:

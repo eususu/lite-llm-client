@@ -9,6 +9,7 @@ python-dotenv = "*"
 pydantic = "*"
 build = "*"
 lite-llm-client = {file = ".", editable = true}
+pytest = "*"
 
 [dev-packages]
 
