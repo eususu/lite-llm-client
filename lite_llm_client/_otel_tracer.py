@@ -7,7 +7,7 @@ from opentelemetry.sdk.resources import Resource, SERVICE_NAME
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 
 otlp_exporter = OTLPSpanExporter(
-    endpoint="http://localhost:4317",
+    endpoint="http://eususu.synology.me:4317",
     insecure=True
 )
 

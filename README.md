@@ -36,6 +36,10 @@ GEMINI_API_KEY=YOUR KEY
 ## Future version
 - [ ] support multimodal (image and text)
 
+
+## 0.1.2
+ - [x] `2024-10-25` fix exception when use new model name as str type
+
 ## 0.1.0
 - [x] `2024-07-21` support OpenAI
 - [x] `2024-07-25` support Anthropic

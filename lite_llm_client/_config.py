@@ -33,7 +33,7 @@ class OpenAIConfig(LLMConfig):
     self.api_key = api_key
     if not self.api_key and "OPENAI_API_KEY" in os.environ:
       self.api_key = os.environ["OPENAI_API_KEY"]
-    assert self.api_key and len(self.api_key) > 0, "api_key must be exists(check argument or environment variable)"
+    assert self.api_key and len(self.api_key) > 0, "api_key must be exists(check argument or environment variable OPENAI_API_KEY)"
     self.model = model
   
   def get_chat_completion_url(self)->str:
@@ -65,7 +65,7 @@ class AnthropicConfig(LLMConfig):
     self.api_key = api_key
     if not self.api_key and "ANTHROPIC_API_KEY" in os.environ:
       self.api_key = os.environ["ANTHROPIC_API_KEY"]
-    assert self.api_key and len(self.api_key) > 0, "api_key must be exists(check argument or environment variable)"
+    assert self.api_key and len(self.api_key) > 0, "api_key must be exists(check argument or environment variable ANTHROPIC_API_KEY)"
     self.model = model
 
   def get_chat_completion_url(self)->str:
@@ -98,7 +98,7 @@ class GeminiConfig(LLMConfig):
     if not self.api_key and "GEMINI_API_KEY" in os.environ:
       self.api_key = os.environ["GEMINI_API_KEY"]
     
-    assert self.api_key and len(self.api_key) > 0, "api_key must be exists(check argument or environment variable)"
+    assert self.api_key and len(self.api_key) > 0, "api_key must be exists(check argument or environment variable GEMINI_API_KEY)"
     self.model = model if isinstance(model, str) else model.value
 
     #if not self.api_key:

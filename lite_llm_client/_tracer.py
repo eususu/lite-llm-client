@@ -22,10 +22,10 @@ try:
     importlib.import_module('opentelemetry')
     from lite_llm_client._otel_tracer import _OtelTracer
     tracer = _OtelTracer()
-    tracer = _DummyTracer()
 
-except ImportError:
+except ImportError as e:
     # opentelemetry 모듈이 없으면 _DummyTracer 객체 생성
+    logging.warn(e)
     tracer = _DummyTracer()
 
 logging.info(f"Loaded tracer={tracer}")
