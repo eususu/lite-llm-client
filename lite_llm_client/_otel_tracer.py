@@ -1,6 +1,6 @@
 import json
 import os
-from typing import List
+from typing import Any, List
 
 from lite_llm_client._types import _ITracer
 
@@ -29,7 +29,7 @@ trace.set_tracer_provider(provider)
 tracer = trace.get_tracer(__name__)
 
 from openinference.semconv.trace import SpanAttributes, MessageAttributes, MessageContentAttributes
-from openinference.semconv.trace import OpenInferenceSpanKindValues
+from openinference.semconv.trace import OpenInferenceSpanKindValues, OpenInferenceMimeTypeValues
 class _OtelTracer(_ITracer):
 
 
@@ -51,9 +51,18 @@ class _OtelTracer(_ITracer):
 
     span.set_attribute(SpanAttributes.LLM_INVOCATION_PARAMETERS, json.dumps(extra_args))
 
-  def add_llm_output(self, output:str):
+  def add_llm_output(self, output:str, output_type:str='text'):
     span = get_current_span()
-    span.set_attribute(SpanAttributes.OUTPUT_VALUE, output)
+
+    value = output
+    if output_type == 'text':
+      span.set_attribute(SpanAttributes.OUTPUT_MIME_TYPE, OpenInferenceMimeTypeValues.TEXT)
+    elif output_type == 'json':
+      span.set_attribute(SpanAttributes.OUTPUT_MIME_TYPE, OpenInferenceMimeTypeValues.JSON)
+    else:
+      raise ValueError(f"unknown type ({output_type})")
+    span.set_attribute(SpanAttributes.OUTPUT_VALUE, value)
+
     span.set_status(status=Status(StatusCode.OK))
 
   def add_llm_usage(self, prompt_tokens:int, completion_tokens:int, total_tokens:int):

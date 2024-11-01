@@ -13,7 +13,7 @@ class _ITracer(ABC):
    raise NotImplementedError
 
   @abstractmethod
-  def add_llm_output(self, output:str):
+  def add_llm_output(self, output:str|dict, output_type:str='text'):
    raise NotImplementedError
 
   @abstractmethod

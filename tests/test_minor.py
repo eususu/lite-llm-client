@@ -27,8 +27,9 @@ def llm(query:str):
     messages.append(LLMMessage(role=LLMMessageRole.USER, content=query))
     answer = llc.chat_completions(messages=messages)
     logging.info(answer)
+    return answer
 
-@tracer.start_as_current_span(__name__)
+@tracer.start_as_current_span("_embedding function")
 def _embedding(query:str, docs:List[str]):
     span = get_current_span()
     span.set_attribute(SpanAttributes.OPENINFERENCE_SPAN_KIND, OpenInferenceSpanKindValues.EMBEDDING.value)
@@ -42,7 +43,7 @@ def _embedding(query:str, docs:List[str]):
         span.set_attribute(f'{SpanAttributes.EMBEDDING_EMBEDDINGS}.{index}.{EmbeddingAttributes.EMBEDDING_TEXT}', docs[index])
         span.set_attribute(f'{SpanAttributes.EMBEDDING_EMBEDDINGS}.{index}.{EmbeddingAttributes.EMBEDDING_VECTOR}', vec)
 
-@tracer.start_as_current_span(__name__)
+@tracer.start_as_current_span("_retriever function")
 def _retriever(query:str):
     span = get_current_span()
     span.set_attribute(SpanAttributes.OPENINFERENCE_SPAN_KIND, OpenInferenceSpanKindValues.RETRIEVER.value)
@@ -59,12 +60,15 @@ def _retriever(query:str):
     _embedding(query, docs)
 
 
-@tracer.start_as_current_span(__name__)
+@tracer.start_as_current_span("test_chain 시작")
 def test_chain():
     span = get_current_span()
     span.set_attribute(SpanAttributes.OPENINFERENCE_SPAN_KIND, OpenInferenceSpanKindValues.CHAIN.value)
 
     query = "여기에서 내가 두개를 먹으면 몇개가 남지?"
+    span.set_attribute(SpanAttributes.INPUT_VALUE, query)
     _retriever(query)
 
-    #llm()
+    answer = "N개"
+    answer = llm(query=query)
+    tracer.add_llm_output({"result":answer}, 'json')
