@@ -6,6 +6,7 @@ import requests
 from lite_llm_client._config import AnthropicConfig
 from lite_llm_client._http_sse import SSEDataType, decode_sse
 from lite_llm_client._interfaces import InferenceOptions, InferenceResult, LLMClient, LLMMessage, LLMMessageRole
+from lite_llm_client._tracer import tracer
 
 
 class AnthropicClient(LLMClient):
@@ -41,12 +42,8 @@ class AnthropicClient(LLMClient):
     request = {
       "model": model_name,
       'max_tokens': self.config.max_tokens,
-      "messages": msgs,
       "temperature": _options.temperature,
     }
-
-    if len(system_prompt) > 0:
-      request['system'] = "\n".join(system_prompt)
 
     if _options.top_k:
       request['top_k'] = _options.top_k
@@ -55,6 +52,13 @@ class AnthropicClient(LLMClient):
 
     if use_sse:
       request['stream'] = True
+
+    tracer.add_llm_info(llm_provider="OpenAI", model_name=model_name, messages=msgs, extra_args=request)
+
+    request["messages"] = msgs
+
+    if len(system_prompt) > 0:
+      request['system'] = "\n".join(system_prompt)
 
     http_response = requests.api.post(
       self.config.get_chat_completion_url(),
@@ -147,8 +151,15 @@ class AnthropicClient(LLMClient):
     response = http_response.json()
 
     #logging.info(response)
+    inference_result = InferenceResult()
+    self._parse_response(inference_result, response)
+    tracer.add_llm_usage(
+      prompt_tokens=inference_result.prompt_tokens,
+      completion_tokens=inference_result.completion_tokens,
+      total_tokens=inference_result.total_tokens,
+      )
     if options is not None:
-      self._parse_response(options.inference_result, response)
+      options.inference_result = inference_result
 
     content = response['content'][0]
     return content['text']

@@ -35,10 +35,12 @@ GEMINI_API_KEY=YOUR KEY
 
 ## Future version
 - [ ] support multimodal (image and text)
+- [ ] apply opentelemetry in async functions
 
+- [x] `2024-11-01` apply opentelemetry in sync functions
 
 ## 0.1.2
- - [x] `2024-10-25` fix exception when use new model name as str type
+- [x] `2024-10-25` fix exception when use new model name as str type
 
 ## 0.1.0
 - [x] `2024-07-21` support OpenAI

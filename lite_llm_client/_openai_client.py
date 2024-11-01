@@ -44,10 +44,6 @@ class OpenAIClient(LLMClient):
 
     request["messages"] = msgs
 
-
-
-    #logging.info(f'request={request}')
-
     http_response = requests.api.post(
       self.config.get_chat_completion_url(),
       headers={'Content-Type': 'application/json', 'Authorization': f'Bearer {self.config.api_key}'},
