@@ -6,6 +6,7 @@ import requests
 
 from lite_llm_client._interfaces import InferenceOptions, InferenceResult, LLMClient, LLMMessage, LLMMessageRole
 from lite_llm_client._http_sse import SSEDataType, decode_sse
+from lite_llm_client._tracer import tracer
 
 class OpenAIClient(LLMClient):
   config:OpenAIConfig
@@ -33,12 +34,17 @@ class OpenAIClient(LLMClient):
     model_name = self.config.model.value if isinstance(self.config.model, Enum) else self.config.model
     request = {
       "model": model_name,
-      "messages": msgs,
       "temperature": _options.temperature,
     }
 
     if use_sse:
       request['stream'] = True
+
+    tracer.add_llm_info(llm_provider="OpenAI", model_name=model_name, messages=msgs, extra_args=request)
+
+    request["messages"] = msgs
+
+
 
     #logging.info(f'request={request}')
 
@@ -56,18 +62,26 @@ class OpenAIClient(LLMClient):
 
   
   
-  def _parse_response(self, inference_result:InferenceResult, response:dict):
-
+  def _parse_response(self, inference_options:InferenceOptions, response:dict):
     choices0 = response['choices'][0]
-    inference_result.finish_reason = choices0['finish_reason']
 
     if 'usage' in response:
       usage = response['usage']
-      inference_result.prompt_tokens = usage['prompt_tokens']
-      inference_result.completion_tokens = usage['completion_tokens']
-      inference_result.total_tokens = usage['total_tokens']
+      prompt_tokens = usage['prompt_tokens']
+      completion_tokens = usage['completion_tokens']
+      total_tokens = usage['total_tokens']
 
-    logging.info(inference_result)
+      tracer.add_llm_usage(prompt_tokens=prompt_tokens, completion_tokens=completion_tokens, total_tokens=total_tokens)
+
+      if inference_options:
+        if inference_options.inference_result:
+          inference_result = inference_options.inference_result
+          inference_result.finish_reason = choices0['finish_reason']
+          inference_result.prompt_tokens = prompt_tokens
+          inference_result.completion_tokens = completion_tokens
+          inference_result.total_tokens = total_tokens
+
+          logging.info(inference_result)
 
   def _parse_async_response(self, inference_result:InferenceResult, response:dict)->str:
     choices0 = response['choices'][0]
@@ -107,8 +121,7 @@ class OpenAIClient(LLMClient):
     response = http_response.json()
     #logging.info(f'response={response}')
 
-    if options is not None and options.inference_result is not None:
-      self._parse_response(options.inference_result, response)
+    self._parse_response(options, response)
 
     choices = response['choices']
     return choices[0]["message"]["content"]

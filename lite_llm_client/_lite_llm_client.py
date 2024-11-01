@@ -8,7 +8,6 @@ from lite_llm_client._openai_client import OpenAIClient
 
 from lite_llm_client._tracer import tracer
 
-@tracer.start_as_current_span("LiteLLMClient")
 class LiteLLMClient():
   """
   This is lite-llm-client class.
@@ -32,7 +31,6 @@ class LiteLLMClient():
   config:LLMConfig
   client:LLMClient=None
 
-  @tracer.start_as_current_span("constructor")
   def __init__(self, config:LLMConfig):
     self.config = config
 
@@ -46,10 +44,16 @@ class LiteLLMClient():
     if not self.client:
       raise NotImplementedError()
     
-  @tracer.start_as_current_span("chat_completions with query")
-  def chat_completion(self, query:str, options:InferenceOptions=InferenceOptions()):
+  def chat_completion(self, query:str, context:str=None, system_prompt:str=None, options:InferenceOptions=InferenceOptions()):
     messages:List[LLMMessage]= []
-    messages.append(LLMMessage(role=LLMMessageRole.USER, content=query))
+    if system_prompt:
+      messages.append(LLMMessage(role=LLMMessageRole.SYSTEM, content=system_prompt))
+    if context:
+      content = f'{context}\n{query}'
+    else:
+      content = query
+    messages.append(LLMMessage(role=LLMMessageRole.USER, content=content))
+
 
     return self.chat_completions(messages=messages, options=options)
 
@@ -65,7 +69,10 @@ class LiteLLMClient():
 
     if options is None:
       options = InferenceOptions()
-    return self.client.chat_completions(messages=messages, options=options)
+
+    completion = self.client.chat_completions(messages=messages, options=options)
+    tracer.add_llm_output(output=completion)
+    return completion
 
   @tracer.start_as_current_span("async_chat_completions")
   def async_chat_completions(self, messages:List[LLMMessage], options:InferenceOptions=InferenceOptions())->Iterator[str]:
@@ -78,4 +85,5 @@ class LiteLLMClient():
     """
     if options is None:
       options = InferenceOptions()
+
     return self.client.async_chat_completions(messages=messages, options=options)

@@ -12,5 +12,5 @@ from lite_llm_client._lite_llm_client import LiteLLMClient
 
 client = OpenAIConfig()
 llc = LiteLLMClient(client)
-answer = llc.chat_completion('hi')
+answer = llc.chat_completion('hi', context="친절하게 답해줘", system_prompt="you are helpful assistant.")
 logging.info(answer)

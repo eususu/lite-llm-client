@@ -15,6 +15,14 @@ class LLMMessageRole(IntEnum):
   SYSTEM=2
   ASSISTANT=3
 
+  def to_str(self):
+    if self.value == 1:
+      return "user"
+    elif self.value == 2:
+      return "system"
+    elif self.value == 3:
+      return "assistant"
+
 class LLMMessage(BaseModel):
   role: LLMMessageRole
   content: str
