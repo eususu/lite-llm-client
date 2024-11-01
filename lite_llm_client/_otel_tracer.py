@@ -1,4 +1,5 @@
 import json
+import os
 from typing import List
 
 from lite_llm_client._types import _ITracer
@@ -12,9 +13,8 @@ from opentelemetry.sdk.resources import Resource, SERVICE_NAME
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 
 otlp_exporter = OTLPSpanExporter(
-    #endpoint="http://eususu.synology.me:4317",
-    endpoint="http://172.16.10.108:4317",
-    insecure=True
+    endpoint=os.environ["LLC_OTLP_ENDPOINT"],
+    insecure=True # TODO: need consideration
 )
 
 resource = Resource(attributes={

@@ -1,5 +1,6 @@
 import importlib
 import logging
+import os
 from typing import List
 
 from lite_llm_client._types import _ITracer
@@ -31,8 +32,16 @@ tracer:_ITracer=None
 try:
     # opentelemetry 모듈이 로딩 가능하면 _Tracer 객체 생성
     importlib.import_module('opentelemetry')
-    from lite_llm_client._otel_tracer import _OtelTracer
-    tracer = _OtelTracer()
+
+    OTLP_ENDPOINT = os.getenv("LLC_OTLP_ENDPOINT")
+    if OTLP_ENDPOINT:
+      from lite_llm_client._otel_tracer import _OtelTracer
+      logging.info(f'use LLC_OTLP_ENDPOINT {OTLP_ENDPOINT}')
+      tracer = _OtelTracer()
+    else:
+      logging.warning('LLC_OTLP_ENDPOINT does not specified in environment. use dummy tracer')
+      tracer = _DummyTracer()
+
 
 except ImportError as e:
     # opentelemetry 모듈이 없으면 _DummyTracer 객체 생성
