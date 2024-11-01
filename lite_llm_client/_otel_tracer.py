@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Any, List
+from typing import Any, List, Literal
 
 from lite_llm_client._types import _ITracer
 
@@ -12,14 +12,25 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.resources import Resource, SERVICE_NAME
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 
+from openinference.semconv.resource import ResourceAttributes
+
 otlp_exporter = OTLPSpanExporter(
     endpoint=os.environ["LLC_OTLP_ENDPOINT"],
     insecure=True # TODO: need consideration
 )
 
-resource = Resource(attributes={
-  SERVICE_NAME: "lite-llm-client"
-})
+PHOENIX_PROJECT = os.getenv("LLC_PHOENIX_PROJECT")
+
+
+_resource_attributes = {
+  SERVICE_NAME: "lite-llm-client",
+}
+
+if PHOENIX_PROJECT:
+  # phoenix에 프로젝트 이름 표시하는 용도
+  _resource_attributes[ResourceAttributes.PROJECT_NAME] = PHOENIX_PROJECT #https://github.com/Arize-ai/arize-otel-python/blob/main/src/arize_otel/_register.py#L6
+
+resource = Resource(attributes=_resource_attributes)
 
 # 트레이서 프로바이더 설정
 provider = TracerProvider(resource=resource)
@@ -30,6 +41,7 @@ tracer = trace.get_tracer(__name__)
 
 from openinference.semconv.trace import SpanAttributes, MessageAttributes, MessageContentAttributes
 from openinference.semconv.trace import OpenInferenceSpanKindValues, OpenInferenceMimeTypeValues
+
 class _OtelTracer(_ITracer):
 
 
@@ -51,14 +63,23 @@ class _OtelTracer(_ITracer):
 
     span.set_attribute(SpanAttributes.LLM_INVOCATION_PARAMETERS, json.dumps(extra_args))
 
-  def add_llm_output(self, output:str, output_type:str='text'):
+  def add_llm_output(self, output:Any, output_type:Literal['text', 'json']='json'):
+    r"""
+    LLM의 출력 값을 설정합니다.
+
+    :param output: 출력 값
+    :param output_type: 'text' or 'json' - output의 데이터 형식을 입력.
+    """
     span = get_current_span()
 
     value = output
     if output_type == 'text':
-      span.set_attribute(SpanAttributes.OUTPUT_MIME_TYPE, OpenInferenceMimeTypeValues.TEXT)
+      span.set_attribute(SpanAttributes.OUTPUT_MIME_TYPE, OpenInferenceMimeTypeValues.TEXT.value)
     elif output_type == 'json':
-      span.set_attribute(SpanAttributes.OUTPUT_MIME_TYPE, OpenInferenceMimeTypeValues.JSON)
+      span.set_attribute(SpanAttributes.OUTPUT_MIME_TYPE, OpenInferenceMimeTypeValues.JSON.value)
+
+      if isinstance(output, dict):
+        value = json.dumps(output, ensure_ascii=False)
     else:
       raise ValueError(f"unknown type ({output_type})")
     span.set_attribute(SpanAttributes.OUTPUT_VALUE, value)

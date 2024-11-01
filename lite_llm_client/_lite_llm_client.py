@@ -67,9 +67,6 @@ class LiteLLMClient():
 
     """
 
-    if options is None:
-      options = InferenceOptions()
-
     completion = self.client.chat_completions(messages=messages, options=options)
     tracer.add_llm_output(output=completion)
     return completion
@@ -83,7 +80,5 @@ class LiteLLMClient():
     :return parts of answer. use generator
 
     """
-    if options is None:
-      options = InferenceOptions()
 
     return self.client.async_chat_completions(messages=messages, options=options)

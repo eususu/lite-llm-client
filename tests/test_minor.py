@@ -10,6 +10,10 @@ from lite_llm_client._interfaces import LLMMessage, LLMMessageRole
 from lite_llm_client._lite_llm_client import LiteLLMClient
 from lite_llm_client._tracer import tracer
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 
 client = OpenAIConfig()
 llc = LiteLLMClient(client)
@@ -17,7 +21,13 @@ llc = LiteLLMClient(client)
 #logging.info(answer)
 
 from opentelemetry.trace import Span, get_current_span
-from openinference.semconv.trace import SpanAttributes, OpenInferenceSpanKindValues, EmbeddingAttributes, DocumentAttributes
+from openinference.semconv.trace import (
+    SpanAttributes,
+    OpenInferenceSpanKindValues,
+    EmbeddingAttributes,
+    DocumentAttributes,
+    RerankerAttributes,
+)
 
 def llm(query:str):
     messages = []
@@ -48,7 +58,7 @@ def _retriever(query:str):
     span = get_current_span()
     span.set_attribute(SpanAttributes.OPENINFERENCE_SPAN_KIND, OpenInferenceSpanKindValues.RETRIEVER.value)
 
-    docs = ['관련문서1', '관련문서2']
+    docs = ['관련문서X', '관련문서1', '관련문서2']
     span.set_attribute(SpanAttributes.INPUT_VALUE, query)
 
     for index, doc in enumerate(docs):
@@ -59,6 +69,31 @@ def _retriever(query:str):
 
     _embedding(query, docs)
 
+    return docs
+
+@tracer.start_as_current_span("_rerank function")
+def _rerank(query:str, docs:List[str]):
+    span = get_current_span()
+    span.set_attribute(SpanAttributes.OPENINFERENCE_SPAN_KIND, OpenInferenceSpanKindValues.RERANKER.value)
+    span.set_attribute(RerankerAttributes.RERANKER_MODEL_NAME, 'bge-m3-reranker')
+    span.set_attribute(RerankerAttributes.RERANKER_QUERY, query)
+    span.set_attribute(RerankerAttributes.RERANKER_TOP_K, 10)
+
+    for index, doc in enumerate(docs):
+        span.set_attribute(f'{RerankerAttributes.RERANKER_INPUT_DOCUMENTS}.{index}.{DocumentAttributes.DOCUMENT_ID}', index)
+        span.set_attribute(f'{RerankerAttributes.RERANKER_INPUT_DOCUMENTS}.{index}.{DocumentAttributes.DOCUMENT_CONTENT}', doc)
+        span.set_attribute(f'{RerankerAttributes.RERANKER_INPUT_DOCUMENTS}.{index}.{DocumentAttributes.DOCUMENT_METADATA}', '{"METADATA": "test", "src":"/mnt/c/test"}')
+        span.set_attribute(f'{RerankerAttributes.RERANKER_INPUT_DOCUMENTS}.{index}.{DocumentAttributes.DOCUMENT_SCORE}', 0.8821)
+
+    ordered_docs = sorted(docs) # RERANK를 이용한 재정렬
+
+    for index, doc in enumerate(ordered_docs):
+        span.set_attribute(f'{RerankerAttributes.RERANKER_OUTPUT_DOCUMENTS}.{index}.{DocumentAttributes.DOCUMENT_ID}', index)
+        span.set_attribute(f'{RerankerAttributes.RERANKER_OUTPUT_DOCUMENTS}.{index}.{DocumentAttributes.DOCUMENT_CONTENT}', doc)
+        span.set_attribute(f'{RerankerAttributes.RERANKER_OUTPUT_DOCUMENTS}.{index}.{DocumentAttributes.DOCUMENT_METADATA}', '{"METADATA": "test", "src":"/mnt/c/test"}')
+        span.set_attribute(f'{RerankerAttributes.RERANKER_OUTPUT_DOCUMENTS}.{index}.{DocumentAttributes.DOCUMENT_SCORE}', 0.8821)
+
+    return ordered_docs
 
 @tracer.start_as_current_span("test_chain 시작")
 def test_chain():
@@ -67,8 +102,14 @@ def test_chain():
 
     query = "여기에서 내가 두개를 먹으면 몇개가 남지?"
     span.set_attribute(SpanAttributes.INPUT_VALUE, query)
-    _retriever(query)
+    docs = _retriever(query) # RETRIEVER
+    ordered_docs = _rerank(query, docs) # RERANK
 
     answer = "N개"
-    answer = llm(query=query)
+    answer = llm(query=query) # LLM
+    import json
     tracer.add_llm_output({"result":answer}, 'json')
+
+if __name__ == "__main__":
+    print("gogo chain")
+    test_chain()

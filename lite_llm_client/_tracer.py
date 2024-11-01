@@ -1,7 +1,7 @@
 import importlib
 import logging
 import os
-from typing import List
+from typing import Any, List, Literal
 
 from lite_llm_client._types import _ITracer
 
@@ -20,7 +20,7 @@ class _DummyTracer(_ITracer):
   def add_llm_info(self, llm_provider:str, model_name:str, messages:List[dict], extra_args:dict):
     pass
 
-  def add_llm_output(self, output:str):
+  def add_llm_output(self, output:Any, output_type:Literal['text', 'json']='json'):
     pass
 
   def add_llm_usage(self, prompt_tokens:int, completion_tokens:int, total_tokens:int):
@@ -34,12 +34,18 @@ try:
     importlib.import_module('opentelemetry')
 
     OTLP_ENDPOINT = os.getenv("LLC_OTLP_ENDPOINT")
+    PHOENIX_PROJECT = os.getenv("LLC_PHOENIX_PROJECT")
+
+    if PHOENIX_PROJECT is None:
+      logging.warning("Please ensure that LLC_PHOENIX_PROJECT is specified in the environment")
+
     if OTLP_ENDPOINT:
       from lite_llm_client._otel_tracer import _OtelTracer
-      logging.info(f'use LLC_OTLP_ENDPOINT {OTLP_ENDPOINT}')
+      logging.info(f'Using LLC_OTLP_ENDPOINT({OTLP_ENDPOINT})')
       tracer = _OtelTracer()
     else:
-      logging.warning('LLC_OTLP_ENDPOINT does not specified in environment. use dummy tracer')
+      logging.warning("Please ensure that LLC_OTLP_ENDPOINT is specified in the environment")
+      logging.warning("Using `dummy tracer`")
       tracer = _DummyTracer()
 
 

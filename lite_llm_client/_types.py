@@ -1,6 +1,6 @@
 
 from abc import ABC, abstractmethod
-from typing import List
+from typing import Any, List, Literal
 
 
 class _ITracer(ABC):
@@ -13,7 +13,7 @@ class _ITracer(ABC):
    raise NotImplementedError
 
   @abstractmethod
-  def add_llm_output(self, output:str|dict, output_type:str='text'):
+  def add_llm_output(self, output:Any, output_type:Literal['text', 'json']='json'):
    raise NotImplementedError
 
   @abstractmethod
