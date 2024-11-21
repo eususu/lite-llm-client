@@ -34,6 +34,7 @@ try:
     importlib.import_module('opentelemetry')
 
     OTLP_ENDPOINT = os.getenv("LLC_OTLP_ENDPOINT")
+    OTLP_SERVICE_NAME = os.getenv("LLPC_OTLP_SERVICE_NAME")
     PHOENIX_PROJECT = os.getenv("LLC_PHOENIX_PROJECT")
 
     if PHOENIX_PROJECT is None:

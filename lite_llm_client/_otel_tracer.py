@@ -20,10 +20,10 @@ otlp_exporter = OTLPSpanExporter(
 )
 
 PHOENIX_PROJECT = os.getenv("LLC_PHOENIX_PROJECT")
-
+OTLP_SERVICE_NAME = os.getenv("LLC_OTLP_SERVICE_NAME")
 
 _resource_attributes = {
-  SERVICE_NAME: "lite-llm-client",
+  SERVICE_NAME: "lite-llm-client" if not OTLP_SERVICE_NAME else OTLP_SERVICE_NAME,
 }
 
 if PHOENIX_PROJECT:
@@ -43,7 +43,6 @@ from openinference.semconv.trace import SpanAttributes, MessageAttributes, Messa
 from openinference.semconv.trace import OpenInferenceSpanKindValues, OpenInferenceMimeTypeValues
 
 class _OtelTracer(_ITracer):
-
 
   def start_as_current_span(self, name):
     return tracer.start_as_current_span(name)

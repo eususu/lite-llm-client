@@ -6,14 +6,20 @@ sys.path.append(os.path.abspath('.'))
 import logging
 from _share import get_test_messages
 from lite_llm_client._config import OpenAIConfig
-from lite_llm_client._interfaces import LLMMessage, LLMMessageRole
 from lite_llm_client._lite_llm_client import LiteLLMClient
+from lite_llm_client import LLMMessage, LLMMessageRole
 from lite_llm_client._tracer import tracer
 
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ],
+    force=True
 )
+
+
 
 client = OpenAIConfig()
 llc = LiteLLMClient(client)
@@ -110,6 +116,26 @@ def test_chain():
     import json
     tracer.add_llm_output({"result":answer}, 'json')
 
+@tracer.start_as_current_span("/http_test")
+def test_http():
+    logging.info("BEGIN")
+    print(tracer)
+    span = get_current_span()
+    span.set_attribute('http.method', 'POST')
+    span.set_attribute('http.server_name', '0.0.0.0')
+    span.set_attribute('http.scheme', 'http')
+    span.set_attribute('net.host.port', 8082)
+    span.set_attribute('host.port', '172.16.10.14:8082')
+    span.set_attribute('http.target', '/http_test?query1=value')
+    span.set_attribute('http.user_agent', 'Mozilla...')
+    span.set_attribute('http.flavor', '1.1')
+    span.set_attribute('http.route', '/http_test')
+    span.set_attribute('http.status_code', 200)
+
+
+    print('test done')
+
 if __name__ == "__main__":
     print("gogo chain")
-    test_chain()
+    #test_chain()
+    test_http()
