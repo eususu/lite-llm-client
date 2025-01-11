@@ -21,6 +21,7 @@ nm:
 	@python -c 'import lite_llm_client; exports = list(filter(lambda x: x.find("_") == -1, dir(lite_llm_client))); print("\n".join(exports));'
 
 build:
+	rm -rf dist
 	python -m build
 	pip install -e .
 
