@@ -37,6 +37,8 @@ GEMINI_API_KEY=YOUR KEY
 - [ ] support multimodal (image and text)
 - [ ] apply opentelemetry in async functions
 
+## 0.2.0
+- [x] `2025-01-11` support json mode(OpenAI)
 - [x] `2024-11-01` apply opentelemetry in sync functions
 
 ## 0.1.2

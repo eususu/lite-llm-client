@@ -44,7 +44,15 @@ class LiteLLMClient():
     if not self.client:
       raise NotImplementedError()
     
-  def chat_completion(self, query:str, context:str=None, system_prompt:str=None, options:InferenceOptions=InferenceOptions()):
+  def chat_completion(
+      self,
+      query:str,
+      context:str=None,
+      system_prompt:str=None,
+      json_schema:dict=None,
+      options:InferenceOptions=InferenceOptions()
+      ):
+
     messages:List[LLMMessage]= []
     if system_prompt:
       messages.append(LLMMessage(role=LLMMessageRole.SYSTEM, content=system_prompt))
@@ -55,10 +63,10 @@ class LiteLLMClient():
     messages.append(LLMMessage(role=LLMMessageRole.USER, content=content))
 
 
-    return self.chat_completions(messages=messages, options=options)
+    return self.chat_completions(messages=messages, json_schema=json_schema, options=options)
 
   @tracer.start_as_current_span("chat_completions")
-  def chat_completions(self, messages:List[LLMMessage], options:InferenceOptions=InferenceOptions()):
+  def chat_completions(self, messages:List[LLMMessage], json_schema:dict=None, options:InferenceOptions=InferenceOptions()):
     r"""chat completions
     
     :param messages: messages
@@ -67,7 +75,7 @@ class LiteLLMClient():
 
     """
 
-    completion = self.client.chat_completions(messages=messages, options=options)
+    completion = self.client.chat_completions(messages=messages, json_schema=json_schema, options=options)
     tracer.add_llm_output(output=completion)
     return completion
 

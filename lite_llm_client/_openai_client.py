@@ -15,7 +15,7 @@ class OpenAIClient(LLMClient):
     self.config = config
 
     
-  def _make_and_send_request(self, messages:List[LLMMessage], options:InferenceOptions, use_sse=False)->requests.Response:
+  def _make_and_send_request(self, messages:List[LLMMessage], json_schema:dict|None, options:InferenceOptions, use_sse=False)->requests.Response:
     _options = options if options else InferenceOptions()
     msgs = []
     for msg in messages:
@@ -43,6 +43,11 @@ class OpenAIClient(LLMClient):
     tracer.add_llm_info(llm_provider="OpenAI", model_name=model_name, messages=msgs, extra_args=request)
 
     request["messages"] = msgs
+    if json_schema:
+      request["response_format"] = {
+        "type": "json_schema",
+        "json_schema": json_schema
+      }
 
     http_response = requests.api.post(
       self.config.get_chat_completion_url(),
@@ -112,8 +117,8 @@ class OpenAIClient(LLMClient):
         pass
 
 
-  def chat_completions(self, messages:List[LLMMessage], options:InferenceOptions):
-    http_response = self._make_and_send_request(messages=messages, options=options)
+  def chat_completions(self, messages:List[LLMMessage], json_schema:dict, options:InferenceOptions):
+    http_response = self._make_and_send_request(messages=messages, json_schema=json_schema, options=options)
     response = http_response.json()
     #logging.info(f'response={response}')
 
