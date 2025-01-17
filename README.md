@@ -36,6 +36,7 @@ GEMINI_API_KEY=YOUR KEY
 ## Future version
 - [ ] support multimodal (image and text)
 - [ ] apply opentelemetry in async functions
+- [ ] support batch (OpenAI)
 
 ## 0.2.0
 - [x] `2025-01-11` support json mode(OpenAI)
