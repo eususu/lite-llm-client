@@ -15,6 +15,9 @@ test_anthropic:
 test_gemini:
 	pytest tests/test_gemini.py
 
+test_batch:
+	pytest tests/test_oai_batch.py
+
 
 
 nm:

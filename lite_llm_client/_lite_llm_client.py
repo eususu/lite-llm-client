@@ -3,7 +3,7 @@ from typing import Iterator, List
 from lite_llm_client._anthropic_client import AnthropicClient
 from lite_llm_client._config import GeminiConfig, LLMConfig, OpenAIConfig, AnthropicConfig
 from lite_llm_client._gemini_client import GeminiClient
-from lite_llm_client._interfaces import InferenceOptions, LLMClient, LLMMessage, LLMMessageRole
+from lite_llm_client._interfaces import InferenceOptions, LLMBatch, LLMClient, LLMMessage, LLMMessageRole, LLMResponse
 from lite_llm_client._openai_client import OpenAIClient
 
 from lite_llm_client._tracer import tracer
@@ -30,6 +30,7 @@ class LiteLLMClient():
   """
   config:LLMConfig
   client:LLMClient=None
+  batch:LLMBatch=None
 
   def __init__(self, config:LLMConfig):
     self.config = config
@@ -40,6 +41,7 @@ class LiteLLMClient():
       self.client = AnthropicClient(config)
     elif isinstance(config, GeminiConfig):
       self.client = GeminiClient(config)
+    self.batch = LLMBatch()
 
     if not self.client:
       raise NotImplementedError()
@@ -50,8 +52,8 @@ class LiteLLMClient():
       context:str=None,
       system_prompt:str=None,
       json_schema:dict=None,
-      options:InferenceOptions=InferenceOptions()
-      ):
+      options:InferenceOptions=InferenceOptions(),
+      )->LLMResponse:
 
     messages:List[LLMMessage]= []
     if system_prompt:
@@ -62,11 +64,11 @@ class LiteLLMClient():
       content = query
     messages.append(LLMMessage(role=LLMMessageRole.USER, content=content))
 
-
     return self.chat_completions(messages=messages, json_schema=json_schema, options=options)
 
+  
   @tracer.start_as_current_span("chat_completions")
-  def chat_completions(self, messages:List[LLMMessage], json_schema:dict=None, options:InferenceOptions=InferenceOptions()):
+  def chat_completions(self, messages:List[LLMMessage], json_schema:dict=None, options:InferenceOptions=InferenceOptions())->LLMResponse:
     r"""chat completions
     
     :param messages: messages
@@ -76,7 +78,7 @@ class LiteLLMClient():
     """
 
     completion = self.client.chat_completions(messages=messages, json_schema=json_schema, options=options)
-    tracer.add_llm_output(output=completion)
+    tracer.add_llm_output(output=completion.text)
     return completion
 
   @tracer.start_as_current_span("async_chat_completions")

@@ -4,7 +4,7 @@ from typing import Iterator, List
 from lite_llm_client._config import OpenAIConfig
 import requests
 
-from lite_llm_client._interfaces import InferenceOptions, InferenceResult, LLMClient, LLMMessage, LLMMessageRole
+from lite_llm_client._interfaces import InferenceOptions, InferenceResult, LLMClient, LLMMessage, LLMMessageRole, LLMResponse
 from lite_llm_client._http_sse import SSEDataType, decode_sse
 from lite_llm_client._tracer import tracer
 
@@ -15,7 +15,7 @@ class OpenAIClient(LLMClient):
     self.config = config
 
     
-  def _make_and_send_request(self, messages:List[LLMMessage], json_schema:dict|None, options:InferenceOptions, use_sse=False)->requests.Response:
+  def _make_and_request(self, messages:List[LLMMessage], json_schema:dict|None, options:InferenceOptions, use_sse=False)->requests.Response:
     _options = options if options else InferenceOptions()
     msgs = []
     for msg in messages:
@@ -48,6 +48,10 @@ class OpenAIClient(LLMClient):
         "type": "json_schema",
         "json_schema": json_schema
       }
+    return request
+
+  def _make_and_send_request(self, messages:List[LLMMessage], json_schema:dict|None, options:InferenceOptions, use_sse=False)->requests.Response:
+    request = self._make_and_request(messages, json_schema, options, use_sse)
 
     http_response = requests.api.post(
       self.config.get_chat_completion_url(),
@@ -117,7 +121,17 @@ class OpenAIClient(LLMClient):
         pass
 
 
-  def chat_completions(self, messages:List[LLMMessage], json_schema:dict, options:InferenceOptions):
+  def chat_completions(self, messages:List[LLMMessage], json_schema:dict, options:InferenceOptions)->LLMResponse:
+
+    if options.batch_mode:
+      request = self._make_and_request(messages=messages, json_schema=json_schema, options=options)
+      return LLMResponse(text="", request={
+        "method": "POST",
+        "url": "/v1/chat/completions",
+        "body":request
+        }
+        )
+
     http_response = self._make_and_send_request(messages=messages, json_schema=json_schema, options=options)
     response = http_response.json()
     #logging.info(f'response={response}')
@@ -125,4 +139,4 @@ class OpenAIClient(LLMClient):
     self._parse_response(options, response)
 
     choices = response['choices']
-    return choices[0]["message"]["content"]
+    return LLMResponse(text=choices[0]["message"]["content"])
