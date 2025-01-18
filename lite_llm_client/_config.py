@@ -18,6 +18,8 @@ class OpenAIConfig(LLMConfig):
   base_url: str
   api_key: str
   chat_completion_path: Optional[str] ="/v1/chat/completions"
+  batch_path: Optional[str] = "/v1/batches"
+  files_path: Optional[str] = "/v1/files"
   model:Union[OpenAIModel,str]
 
   def __init__(self,

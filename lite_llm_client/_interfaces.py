@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from enum import IntEnum
 import logging
 from typing import Iterator, List, Literal, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, field_validator, validator
 
 @dataclass
 class LLMConfig(ABC):
@@ -59,21 +59,75 @@ class LLMClient(ABC):
   def async_chat_completions(self, messages:List[LLMMessage], options:InferenceOptions)->Iterator[str]:
     raise NotImplementedError
 
-class LLMBatch():
+
+class LLMFileInfo(BaseModel):
+  model_config = ConfigDict(extra="allow")
+
+  id:str
+  filename:str
+
+class LLMFiles(ABC):
+
+  def create_jsonl(self, file_name:str, jsonl=List[dict])->LLMFileInfo:
+    import json
+    data = []
+    for line in jsonl:
+      dump = json.dumps(line, ensure_ascii=False)
+      data.append(dump)
+    return self.create(file_name=file_name, file_data="\n".join(data))
+
+  @abstractmethod
+  def create(self, file_name:str, file_data:str)->LLMFileInfo:
+    raise NotImplementedError
+
+  @abstractmethod
+  def content(self, file_id:str)->str:
+    raise NotImplementedError
+
+  @abstractmethod
+  def list()->List[dict]:
+    raise NotImplementedError
+
+  @abstractmethod
+  def delete(file_id:str):
+    raise NotImplementedError
+
+from datetime import datetime
+
+class LLMBatchInfo(BaseModel):
+  model_config = ConfigDict(extra="allow")
+
+  id:str
+  input_file_id:str
+  created_at:datetime
+  in_progress_at:Optional[datetime]
+  expires_at:Optional[datetime]
+  finalizing_at:Optional[datetime]
+  completed_at:Optional[datetime]
+  request_counts:dict = {"total": 0, "completed": 0, "failed": 0}
+
+  @field_validator('created_at', 'in_progress_at', 'expires_at', 'finalizing_at', 'completed_at', mode="before")
+  def convert_timestamp(cls, v):
+    try:
+      dt = datetime.fromtimestamp(v)
+      return dt
+    except:
+      return None
+
+
+
+class LLMBatch(ABC):
   def __init__(self):
     pass
 
-  def create(self, batch_data:List[dict]):
-    import json
+  @abstractmethod
+  def create(self, file_id:str)->LLMBatchInfo:
+    raise NotImplementedError
 
-    batch_request = [
+  @abstractmethod
+  def cancel(self, batch_id:str):
+    raise NotImplementedError
 
-    ]
-
-    for index, req in enumerate(batch_data):
-
-      req["custom_id"]= f"request-{index}",
-      j = json.dumps(req, indent=2, ensure_ascii=False)
-      logging.info(j)
-      batch_request.append(req)
-    pass
+  @abstractmethod
+  def list()->List[LLMBatchInfo]:
+    raise NotImplementedError

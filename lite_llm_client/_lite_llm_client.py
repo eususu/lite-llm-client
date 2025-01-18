@@ -3,8 +3,8 @@ from typing import Iterator, List
 from lite_llm_client._anthropic_client import AnthropicClient
 from lite_llm_client._config import GeminiConfig, LLMConfig, OpenAIConfig, AnthropicConfig
 from lite_llm_client._gemini_client import GeminiClient
-from lite_llm_client._interfaces import InferenceOptions, LLMBatch, LLMClient, LLMMessage, LLMMessageRole, LLMResponse
-from lite_llm_client._openai_client import OpenAIClient
+from lite_llm_client._interfaces import InferenceOptions, LLMBatch, LLMClient, LLMFiles, LLMMessage, LLMMessageRole, LLMResponse
+from lite_llm_client._openai_client import OpenAIBatchClient, OpenAIClient, OpenAIFilesClient
 
 from lite_llm_client._tracer import tracer
 
@@ -30,6 +30,7 @@ class LiteLLMClient():
   """
   config:LLMConfig
   client:LLMClient=None
+  files:LLMFiles=None
   batch:LLMBatch=None
 
   def __init__(self, config:LLMConfig):
@@ -37,11 +38,12 @@ class LiteLLMClient():
 
     if isinstance(config, OpenAIConfig):
       self.client = OpenAIClient(config)
+      self.files = OpenAIFilesClient(config)
+      self.batch = OpenAIBatchClient(config)
     elif isinstance(config, AnthropicConfig):
       self.client = AnthropicClient(config)
     elif isinstance(config, GeminiConfig):
       self.client = GeminiClient(config)
-    self.batch = LLMBatch()
 
     if not self.client:
       raise NotImplementedError()
