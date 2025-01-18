@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import IntEnum
 import logging
-from typing import Iterator, List, Literal, Optional
+from typing import Iterator, List, Literal, Optional, Tuple
 from pydantic import BaseModel, ConfigDict, field_validator, validator
 
 @dataclass
@@ -86,7 +86,7 @@ class LLMFiles(ABC):
     raise NotImplementedError
 
   @abstractmethod
-  def content_by_type(self, file_id:str)->dict:
+  def content_by_type(self, file_id:str)->List[Tuple[LLMResponse, InferenceResult|None]]:
     raise NotImplementedError
 
   @abstractmethod

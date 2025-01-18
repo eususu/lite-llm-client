@@ -36,8 +36,8 @@ def _send_request(base_url:str, path:str, headers:dict, method:str="POST", reque
 
   return http_response
 
-def _parse_response(inference_options:InferenceOptions, response:dict):
-  choices0 = response['choices'][0]
+def _parse_response(inference_options:InferenceOptions, response:dict)->LLMResponse:
+  choices = response['choices']
 
   if 'usage' in response:
     usage = response['usage']
@@ -50,12 +50,13 @@ def _parse_response(inference_options:InferenceOptions, response:dict):
     if inference_options:
       if inference_options.inference_result:
         inference_result = inference_options.inference_result
-        inference_result.finish_reason = choices0['finish_reason']
+        inference_result.finish_reason = choices[0]['finish_reason']
         inference_result.prompt_tokens = prompt_tokens
         inference_result.completion_tokens = completion_tokens
         inference_result.total_tokens = total_tokens
 
         logging.info(inference_result)
+  return LLMResponse(text=choices[0]["message"]["content"])
 
 class OpenAIClient(LLMClient):
   config:OpenAIConfig
@@ -166,12 +167,8 @@ class OpenAIClient(LLMClient):
       request=http_request)
     response = http_response.json()
 
-    _parse_response(options, response)
-
-    choices = response['choices']
-    return LLMResponse(text=choices[0]["message"]["content"])
-
-
+    llm_response = _parse_response(options, response)
+    return llm_response
 
 ####################################
 class OpenAIFilesClient(LLMFiles):
@@ -214,13 +211,10 @@ class OpenAIFilesClient(LLMFiles):
         obj = json.loads(line)
         response = obj["response"]
         body = response["body"]
-        logging.info(body)
         if body["object"] == "chat.completion":
           io=InferenceOptions()
-          _parse_response(io, body)
-          choices = body['choices']
-          answer = LLMResponse(text=choices[0]["message"]["content"])
-        responses.append((answer, io.inference_result))
+          llm_response = _parse_response(io, body)
+        responses.append((llm_response, io.inference_result))
       return responses
     return [(content, None)]
 
@@ -248,6 +242,7 @@ class OpenAIFilesClient(LLMFiles):
 
     return res
 
+####################################
 class OpenAIBatchClient(LLMBatch):
   config:OpenAIConfig
   def __init__(self, config:OpenAIConfig):
