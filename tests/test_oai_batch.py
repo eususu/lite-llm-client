@@ -27,10 +27,18 @@ def test_oai_batch_sync():
 
   file_list = client.files.list()
   for file in file_list:
-    logging.info(file)
-    if file.filename == filename:
+    #if file.filename == filename:
+    if file.purpose == 'batch_output':
+      logging.info(file)
       file_info = file
+
+      #content = client.files.content(file_info.id)
+      contents = client.files.content_by_type(file_info)
+
+      for (answer, inference_result) in contents:
+        logging.info(answer)
       break
+  return
   """
 
       client.files.delete(file.id)
@@ -61,5 +69,13 @@ def test_oai_batch_sync():
 
       if batch.completed_at:
         logging.info(f'{batch.request_counts} 배치 작업 완료에 걸린시간: {batch.completed_at - batch.created_at}')
+
+        content = client.files.content(batch.output_file_id)
+
+        lines = content.split('\n')
+        for line in lines:
+          j = json.loads(line)
+          logging.info(j)
+        break
       break
 

@@ -1,8 +1,9 @@
 from enum import Enum
 import logging
-from typing import Iterator, List
+from typing import Iterator, List, Tuple
 from lite_llm_client._config import OpenAIConfig
 import requests
+import json
 
 from lite_llm_client._interfaces import InferenceOptions, InferenceResult, LLMBatch, LLMBatchInfo, LLMClient, LLMFileInfo, LLMFiles, LLMMessage, LLMMessageRole, LLMResponse
 from lite_llm_client._http_sse import SSEDataType, decode_sse
@@ -34,6 +35,27 @@ def _send_request(base_url:str, path:str, headers:dict, method:str="POST", reque
     raise Exception(f'bad status_code: {http_response.status_code}')
 
   return http_response
+
+def _parse_response(inference_options:InferenceOptions, response:dict):
+  choices0 = response['choices'][0]
+
+  if 'usage' in response:
+    usage = response['usage']
+    prompt_tokens = usage['prompt_tokens']
+    completion_tokens = usage['completion_tokens']
+    total_tokens = usage['total_tokens']
+
+    tracer.add_llm_usage(prompt_tokens=prompt_tokens, completion_tokens=completion_tokens, total_tokens=total_tokens)
+
+    if inference_options:
+      if inference_options.inference_result:
+        inference_result = inference_options.inference_result
+        inference_result.finish_reason = choices0['finish_reason']
+        inference_result.prompt_tokens = prompt_tokens
+        inference_result.completion_tokens = completion_tokens
+        inference_result.total_tokens = total_tokens
+
+        logging.info(inference_result)
 
 class OpenAIClient(LLMClient):
   config:OpenAIConfig
@@ -77,26 +99,6 @@ class OpenAIClient(LLMClient):
     return request
 
   
-  def _parse_response(self, inference_options:InferenceOptions, response:dict):
-    choices0 = response['choices'][0]
-
-    if 'usage' in response:
-      usage = response['usage']
-      prompt_tokens = usage['prompt_tokens']
-      completion_tokens = usage['completion_tokens']
-      total_tokens = usage['total_tokens']
-
-      tracer.add_llm_usage(prompt_tokens=prompt_tokens, completion_tokens=completion_tokens, total_tokens=total_tokens)
-
-      if inference_options:
-        if inference_options.inference_result:
-          inference_result = inference_options.inference_result
-          inference_result.finish_reason = choices0['finish_reason']
-          inference_result.prompt_tokens = prompt_tokens
-          inference_result.completion_tokens = completion_tokens
-          inference_result.total_tokens = total_tokens
-
-          logging.info(inference_result)
 
   def _parse_async_response(self, inference_result:InferenceResult, response:dict)->str:
     choices0 = response['choices'][0]
@@ -164,7 +166,7 @@ class OpenAIClient(LLMClient):
       request=http_request)
     response = http_response.json()
 
-    self._parse_response(options, response)
+    _parse_response(options, response)
 
     choices = response['choices']
     return LLMResponse(text=choices[0]["message"]["content"])
@@ -201,6 +203,26 @@ class OpenAIFilesClient(LLMFiles):
     http_response = _send_request(base_url=self.config.base_url, path=f'{self.config.files_path}/{file_id}/content', headers=headers, method="GET")
     res = http_response.text
     return res
+
+  def content_by_type(self, file_info:LLMFileInfo)->List[Tuple[LLMResponse, InferenceResult|None]]:
+    responses = []
+    content = self.content(file_info.id)
+
+    if file_info.purpose == 'batch_output':
+      lines = content.strip().split('\n')
+      for line in lines:
+        obj = json.loads(line)
+        response = obj["response"]
+        body = response["body"]
+        logging.info(body)
+        if body["object"] == "chat.completion":
+          io=InferenceOptions()
+          _parse_response(io, body)
+          choices = body['choices']
+          answer = LLMResponse(text=choices[0]["message"]["content"])
+        responses.append((answer, io.inference_result))
+      return responses
+    return [(content, None)]
 
   def list(self)->List[LLMFileInfo]:
     headers = {

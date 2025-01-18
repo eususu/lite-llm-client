@@ -65,6 +65,7 @@ class LLMFileInfo(BaseModel):
 
   id:str
   filename:str
+  purpose:str
 
 class LLMFiles(ABC):
 
@@ -85,6 +86,10 @@ class LLMFiles(ABC):
     raise NotImplementedError
 
   @abstractmethod
+  def content_by_type(self, file_id:str)->dict:
+    raise NotImplementedError
+
+  @abstractmethod
   def list()->List[dict]:
     raise NotImplementedError
 
@@ -99,6 +104,7 @@ class LLMBatchInfo(BaseModel):
 
   id:str
   input_file_id:str
+  output_file_id:Optional[str]
   created_at:datetime
   in_progress_at:Optional[datetime]
   expires_at:Optional[datetime]
